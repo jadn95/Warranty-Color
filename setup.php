@@ -39,6 +39,7 @@ function plugin_version_warrantycolor()
         'version'        => PLUGIN_WARRANTYCOLOR_VERSION,
         'author'         => 'TKACZYK Andy',
         'license'        => 'GPLv3',
+        'homepage'     => 'https://github.com/Wanpulse/glpi_warrantycolor',
         'requirements'   => [
             'glpi' => [
                 'min' => '11.0.0'
