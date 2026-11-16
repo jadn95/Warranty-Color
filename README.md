@@ -92,7 +92,11 @@ Cela permet d'avoir une **vision homogène des garanties sur l'ensemble du parc 
 /var/www/html/glpi/plugins/
 ```
 
-3. Vérifier que le dossier du plugin est correctement nommé.
+3. Vérifier que le dossier du plugin s'appelle bien `warrantycolor` (c'est le nom attendu par GLPI) et qu'il appartient à l'utilisateur du serveur web :
+
+```bash
+chown -R www-data:www-data /var/www/html/glpi/plugins/warrantycolor
+```
 4. Depuis GLPI, accéder à :
 
 **Configuration → Plugins**
@@ -101,6 +105,13 @@ Cela permet d'avoir une **vision homogène des garanties sur l'ensemble du parc 
 6. Activer le plugin.
 
 Une fois activé, le plugin applique automatiquement la coloration aux assets concernés.
+
+L'installation et l'activation peuvent aussi se faire en ligne de commande :
+
+```bash
+php bin/console plugin:install warrantycolor -u <utilisateur-admin>
+php bin/console plugin:activate warrantycolor
+```
 
 **Mise à jour depuis la 1.x** : la configuration (table propre au plugin) est reprise automatiquement dans la configuration native de GLPI, puis la table est supprimée.
 
@@ -113,6 +124,20 @@ Le plugin peut être désactivé depuis :
 **Configuration → Plugins → Warranty Color**
 
 La désactivation permet de conserver le plugin installé tout en désactivant son fonctionnement.
+
+---
+
+La désinstallation supprime la configuration du plugin ; les dates de garantie des équipements ne sont jamais modifiées.
+
+---
+
+## 🧯 Dépannage
+
+* **Aucune ligne n'est colorée** : le plugin ne colore que les équipements dont la garantie est renseignée (date de début **et** durée supérieure à 0 dans l'onglet *Gestion*). Une liste d'équipements sans garantie renseignée reste normale.
+* **Un équipement expiré n'est pas teinté** : c'est voulu, seule une pastille grise discrète est affichée.
+* **L'ancien affichage persiste après une mise à jour** : actualiser la page en vidant le cache (Ctrl + F5), le navigateur conserve les anciens scripts.
+* **Les pastilles n'apparaissent pas pour un type d'asset personnalisé** : vérifier que la capacité « Gestion financière » est activée dans la définition de l'asset.
+* **Une information semble manquante** : le plugin respecte les droits de l'utilisateur, un équipement d'une entité non visible n'est pas signalé.
 
 ---
 
