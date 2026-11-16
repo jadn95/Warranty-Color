@@ -1,75 +1,46 @@
 <?php
 
-file_put_contents(
-    '/tmp/warranty_setup_debug.log',
-    date('Y-m-d H:i:s')." SETUP CHARGE\n",
-    FILE_APPEND
-);
+use Glpi\Plugin\Hooks;
 
-define('PLUGIN_WARRANTYCOLOR_VERSION', '1.0.0');
+define('PLUGIN_WARRANTYCOLOR_VERSION', '2.0.0');
+define('PLUGIN_WARRANTYCOLOR_MIN_GLPI', '11.0.0');
 
-
-function plugin_init_warrantycolor()
+function plugin_init_warrantycolor(): void
 {
     global $PLUGIN_HOOKS;
 
-    file_put_contents(
-        '/tmp/warranty_init.log',
-        date('Y-m-d H:i:s') . " INIT OK\n",
-        FILE_APPEND
-    );
-
-
-    include_once(__DIR__ . '/inc/config.class.php');
-    include_once(__DIR__ . '/inc/warranty.class.php');
-    include_once(__DIR__ . '/inc/hook.class.php');
-    include_once(__DIR__ . '/inc/display.class.php');
-
-
     $PLUGIN_HOOKS['config_page']['warrantycolor'] = 'front/config.php';
 
+    // Coloration des listes : feuille de style + script (appel de front/status.php pour les lignes affichées).
+    $PLUGIN_HOOKS[Hooks::ADD_CSS]['warrantycolor']        = ['css/warrantycolor.css'];
+    $PLUGIN_HOOKS[Hooks::ADD_JAVASCRIPT]['warrantycolor'] = ['js/warrantycolor.js', 'js/config.js'];
 
-    $PLUGIN_HOOKS['post_show_item']['warrantycolor'] = 'PluginWarrantycolorHook::postShowItem';
+    // Bandeau d'état de la garantie en haut de la fiche d'un équipement.
+    $PLUGIN_HOOKS[Hooks::PRE_ITEM_FORM]['warrantycolor'] = 'plugin_warrantycolor_preItemForm';
 }
 
-function plugin_version_warrantycolor()
+function plugin_version_warrantycolor(): array
 {
     return [
-        'name'           => 'Warranty Color',
-        'version'        => PLUGIN_WARRANTYCOLOR_VERSION,
-        'author'         => 'TKACZYK Andy',
-        'license'        => 'GPLv3',
-        'homepage'     => 'https://github.com/Wanpulse/glpi_warrantycolor',
-        'requirements'   => [
-            'glpi' => [
-                'min' => '11.0.0'
-            ]
-        ]
+        'name'         => 'Warranty Color',
+        'version'      => PLUGIN_WARRANTYCOLOR_VERSION,
+        'author'       => 'TKACZYK Andy',
+        'license'      => 'GPLv3',
+        'homepage'     => 'https://github.com/jadn95/Warranty-Color',
+        'requirements' => [
+            // Pas de borne « max » : l'API utilisée est stable ; à revalider à chaque version majeure.
+            'glpi' => ['min' => PLUGIN_WARRANTYCOLOR_MIN_GLPI],
+            'php'  => ['min' => '8.2'],
+        ],
     ];
 }
 
-
-function plugin_warrantycolor_check_prerequisites()
+function plugin_warrantycolor_check_prerequisites(): bool
 {
     return true;
 }
 
-
-function plugin_warrantycolor_check_config()
+function plugin_warrantycolor_check_config($verbose = false): bool
 {
     return true;
-}
-
-
-function plugin_warrantycolor_install()
-{
-    include_once(__DIR__ . '/inc/migration.class.php');
-    return PluginWarrantycolorMigration::install();
-}
-
-
-function plugin_warrantycolor_uninstall()
-{
-    include_once(__DIR__ . '/inc/migration.class.php');
-    return PluginWarrantycolorMigration::uninstall();
 }

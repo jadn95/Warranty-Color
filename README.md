@@ -1,152 +1,46 @@
 # GLPI Warranty Color
 
-**Warranty Color** est un plugin pour [GLPI](https://glpi-project.org/) permettant de visualiser rapidement l'état de garantie des équipements directement depuis les listes d'assets.
+Plugin GLPI (11 et 12) qui repère l'état de garantie des équipements directement dans les listes et sur leur fiche.
 
-L'objectif est de rendre les garanties arrivant prochainement à échéance immédiatement visibles, sans avoir à ouvrir chaque fiche d'équipement.
+| État | Affichage |
+| --- | --- |
+| Garantie valide (ou « à vie ») | pastille verte + repère latéral + teinte de ligne (option) |
+| Expire dans N jours ou moins (30 par défaut) | pastille orange + repère latéral + teinte de ligne (option) |
+| Expirée | pastille grise discrète, ligne normale |
+| Non renseignée | rien |
 
----
+L'information ne repose pas sur la couleur seule : chaque pastille porte une **icône** et une **info-bulle** (« Garantie jusqu'au 17-07-2028 (dans 609 j) »), et une **légende** s'affiche au-dessus des listes. Sur la fiche d'un équipement, un bandeau rappelle l'état.
 
-## ✨ Fonctionnalités
+Sur les fiches de ticket, problème et changement, la même pastille apparaît à côté de chaque équipement associé.
 
-* 🎨 Coloration automatique des lignes des assets selon leur état de garantie.
-* 🟢 Une couleur spécifique lorsque l'asset est **encore sous garantie**.
-* 🟠 Une couleur d'alerte lorsque la date d'expiration de la garantie **approche**.
-* ⚪ Retour à l'affichage normal lorsque la garantie est **expirée**.
-* ⚙️ Paramétrage de la couleur et de la durée d'alerte depuis la configuration du plugin.
-* 🔧 Application à **tous les types d'assets** disponibles dans GLPI.
-* 🧩 Compatible avec les assets natifs de GLPI ainsi qu'avec les **assets personnalisés créés manuellement**.
-* 🚀 Fonctionnement automatique dès lors que le plugin est activé.
+Fonctionne avec les équipements natifs et les assets personnalisés ayant la capacité « Gestion financière ».
 
----
+## Installation
 
-## 🎯 Principe de fonctionnement
-
-Warranty Color analyse la **date de fin de garantie** renseignée sur les assets.
-
-Selon cette date, l'affichage de l'asset est adapté :
-
-| Situation                                  | Affichage                      |
-| ------------------------------------------ | ------------------------------ |
-| Asset encore sous garantie                 | 🟢 Couleur « garantie valide » |
-| Garantie arrivant prochainement à échéance | 🟠 Couleur « avertissement »   |
-| Garantie expirée                           | Affichage normal               |
-
-La durée à partir de laquelle un asset doit être considéré comme **proche de l'expiration** est configurable dans les paramètres du plugin.
-
-### Exemple
-
-Avec une durée d'alerte configurée à **30 jours** :
-
-* Garantie dans 6 mois → 🟢 couleur « garantie valide »
-* Garantie dans 15 jours → 🟠 couleur « avertissement »
-* Garantie expirée → affichage normal
-
----
-
-## ⚙️ Configuration
-
-La configuration du plugin permet de définir :
-
-* **Nombre de jours avant expiration** : délai à partir duquel la couleur d'avertissement doit être appliquée.
-* **Couleur de garantie valide** : couleur utilisée lorsqu'un asset est toujours sous garantie.
-* **Couleur d'avertissement** : couleur utilisée lorsque la garantie arrive prochainement à échéance.
-
-Les paramètres peuvent être adaptés selon les besoins de l'organisation.
-
----
-
-## 🧩 Compatibilité avec les assets personnalisés
-
-L'un des objectifs de Warranty Color est de ne pas se limiter aux types d'équipements natifs de GLPI.
-
-Le plugin s'applique également aux **classes d'assets personnalisées** créées dans GLPI.
-
-Par exemple :
-
-* Tablettes
-* Smartphones
-* Équipements radio
-* Terminaux spécifiques
-* Matériel métier
-* Tout autre type d'asset personnalisé
-
-Warranty Color peut également prendre en compte leur date de garantie.
-
-Cela permet d'avoir une **vision homogène des garanties sur l'ensemble du parc informatique et matériel**, indépendamment du type d'asset utilisé dans GLPI.
-
----
-
-## 📦 Installation
-
-1. Télécharger ou cloner le plugin.
-2. Copier le dossier du plugin dans le répertoire `plugins` de GLPI :
-
-```text
-/var/www/html/glpi/plugins/
+```bash
+cp -r warrantycolor /var/www/glpi/plugins/        # ou marketplace/
+chown -R www-data:www-data /var/www/glpi/plugins/warrantycolor
 ```
 
-3. Vérifier que le dossier du plugin est correctement nommé.
-4. Depuis GLPI, accéder à :
+Configuration > Plugins > Warranty Color > Installer, puis Activer (ou `php bin/console plugin:install warrantycolor -u <admin>` puis `plugin:activate warrantycolor`).
 
-**Configuration → Plugins**
+Mise à jour depuis la 1.x : la configuration (table propre au plugin) est reprise automatiquement dans la configuration native de GLPI, puis la table est supprimée.
 
-5. Installer **Warranty Color**.
-6. Activer le plugin.
+## Configuration
 
-Une fois activé, le plugin applique automatiquement la coloration aux assets concernés.
+Configuration > Plugins > Warranty Color : délai d'alerte (1 à 3650 jours), couleurs « valide » et « expiration proche », teinte de toute la ligne ou pastille seule, aperçu en direct, bouton « Valeurs par défaut ». Réservée aux utilisateurs ayant le droit de configuration.
 
----
+## Fonctionnement et sécurité
 
-## 🔌 Désactivation
+GLPI n'offre pas de crochet pour colorer les lignes d'une liste. Un script (`public/js/warrantycolor.js`) repère les liens de fiche des tableaux de résultats et interroge `front/status.php` par lots de 40 adresses. Côté serveur, une seule requête par type d'équipement ; seuls les équipements que l'utilisateur a le droit de voir (droit sur le type, sur les informations financières, et entités actives) sont renvoyés.
 
-Le plugin peut être désactivé depuis :
+Calcul : date de début + durée en mois (comme `Infocom::getWarrantyExpir`). Durée −1 = à vie ; durée 0 ou date absente/invalide = non renseignée.
 
-**Configuration → Plugins → Warranty Color**
+## Développement
 
-La désactivation permet de conserver le plugin installé tout en désactivant son fonctionnement.
+- `src/` : espace de noms `GlpiPlugin\Warrantycolor` (`Warranty` : calcul pur et accès base, `Config`, `Migration`).
+- `php tests/compute_test.php` : tests du calcul d'état (sans base).
+- Textes en français encapsulés dans `__('…', 'warrantycolor')` : prêts pour des fichiers `locales/*.po`.
+- Pas de borne de version maximale : à revalider à chaque version majeure de GLPI.
 
----
-
-## 💻 Compatibilité
-
-Warranty Color est conçu pour fonctionner avec les versions récentes de GLPI.
-
-La version minimale de GLPI requise dépend de la version du plugin utilisée.
-
----
-
-## 💡 Philosophie du plugin
-
-Warranty Color a été conçu pour répondre à un besoin simple :
-
-> **Identifier rapidement les équipements dont la garantie arrive prochainement à échéance.**
-
-Dans un parc comportant plusieurs centaines ou milliers d'équipements, consulter individuellement les fiches pour vérifier les dates de garantie peut être long.
-
-La coloration permet donc d'obtenir une **information visuelle immédiate** directement depuis les listes d'assets.
-
-### Code couleur par défaut
-
-🟢 **Vert** → L'asset est toujours sous garantie.
-
-🟠 **Orange** → La garantie arrive prochainement à échéance.
-
-⚪ **Normal** → La garantie est expirée.
-
-Les couleurs et le délai d'alerte peuvent être personnalisés dans les paramètres du plugin.
-
----
-
-## 📜 Licence
-
-Ce plugin est distribué sous licence **GPLv3**.
-
-Voir le fichier [`LICENSE`](LICENSE) du projet pour connaître les conditions complètes de distribution, de modification et de redistribution.
-
----
-
-## 👨‍💻 Auteur
-
-**Andy Tkaczyk**
-
-Plugin développé pour améliorer la gestion et le suivi des garanties dans GLPI.
+Licence GPLv3 — auteur : Andy Tkaczyk.
