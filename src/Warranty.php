@@ -52,11 +52,12 @@ final class Warranty
             return $none;
         }
 
-        $end   = $start->modify('+' . $duration . ' months');   // même calcul que Infocom::getWarrantyExpir
-        $days  = (int) $today->diff($end)->format('%r%a');
+        // Dernier jour de garantie = début + durée − 1 jour : c'est la « date d'expiration » de la fiche GLPI (Infocom::getWarrantyExpir).
+        $until = $start->modify('+' . $duration . ' months')->modify('-1 day');
+        $days  = (int) $today->diff($until)->format('%r%a');
         $state = $days < 0 ? 'expired' : ($days <= $warnDays ? 'warning' : 'valid');
 
-        return ['state' => $state, 'until' => $end->format('Y-m-d'), 'days' => $days];
+        return ['state' => $state, 'until' => $until->format('Y-m-d'), 'days' => $days];
     }
 
     /** Texte lisible pour une info calculée (info-bulle, bandeau). */
@@ -84,8 +85,14 @@ final class Warranty
         if (!\Infocom::canView()) {
             return null;
         }
-        $rows = self::infocoms($itemtype, [$id]);
         $conf = Config::get();
+        if ($conf['excluded_states'] && !self::visibleIds($itemtype, [$id], $conf['excluded_states'])) {
+            $info = ['state' => 'none', 'until' => null, 'days' => null];          // état exclu dans la configuration
+            $info['label'] = self::label($info);
+
+            return $info;
+        }
+        $rows = self::infocoms($itemtype, [$id]);
         $info = self::computeState($rows[$id]['warranty_date'] ?? null, (int) ($rows[$id]['warranty_duration'] ?? 0), new \DateTimeImmutable('today'), $conf['days_before_expiration']);
         $info['label'] = self::label($info);
 
@@ -120,7 +127,7 @@ final class Warranty
             if (!$type::canView()) {
                 continue;
             }
-            $ids     = self::visibleIds($type, array_keys($byId));
+            $ids     = self::visibleIds($type, array_keys($byId), $conf['excluded_states']);
             $infocom = self::infocoms($type, $ids);
             foreach ($ids as $id) {
                 $info = self::computeState($infocom[$id]['warranty_date'] ?? null, (int) ($infocom[$id]['warranty_duration'] ?? 0), $today, $conf['days_before_expiration']);
@@ -132,7 +139,8 @@ final class Warranty
                     'warning' => $conf['color_warning'],
                     default   => null,
                 };
-                $info['label'] = self::label($info);
+                $info['label']    = self::label($info);
+                $info['itemtype'] = $type;                  // sert au lien de la légende (liste des équipements dans cet état)
                 foreach ($byId[$id] as $href) {
                     $out[$href] = $info;
                 }
@@ -150,6 +158,11 @@ final class Warranty
     public static function resolveLink(string $href): ?array
     {
         global $CFG_GLPI;
+
+        // Forme « Type:id » (case de sélection native des listes GLPI), indépendante de l'adresse des fiches.
+        if (preg_match('/^([\w\\\\]+):(\d+)$/', $href, $m)) {
+            return in_array($m[1], self::getItemtypes(), true) ? [$m[1], (int) $m[2]] : null;
+        }
 
         if (self::$patterns === null) {
             self::$patterns = [];
@@ -174,12 +187,13 @@ final class Warranty
     }
 
     /**
-     * Identifiants visibles par l'utilisateur (entités actives) parmi ceux demandés.
+     * Identifiants visibles par l'utilisateur (entités actives) parmi ceux demandés, hors états exclus.
      *
      * @param int[] $ids
+     * @param int[] $excludedStates états GLPI (glpi_states) dont les équipements ne sont pas signalés
      * @return int[]
      */
-    private static function visibleIds(string $type, array $ids): array
+    private static function visibleIds(string $type, array $ids, array $excludedStates = []): array
     {
         global $DB;
 
@@ -187,6 +201,9 @@ final class Warranty
         $where = ['id' => $ids];
         if ($DB->fieldExists($table, 'entities_id')) {
             $where += getEntitiesRestrictCriteria($table);
+        }
+        if ($excludedStates && $DB->fieldExists($table, 'states_id')) {
+            $where[] = ['NOT' => ['states_id' => $excludedStates]];
         }
 
         return array_map('intval', array_column(iterator_to_array($DB->request(['SELECT' => 'id', 'FROM' => $table, 'WHERE' => $where])), 'id'));

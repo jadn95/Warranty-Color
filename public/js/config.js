@@ -28,6 +28,9 @@
             colorValid.value = form.dataset.defaultValid;
             colorWarning.value = form.dataset.defaultWarning;
             fullRow.checked = form.dataset.defaultFullRow === '1';
+            for (const o of form.elements['excluded_states[]'].options) {
+                o.selected = false;
+            }
             refresh();
         });
         refresh();

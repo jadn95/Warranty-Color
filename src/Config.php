@@ -14,12 +14,13 @@ final class Config
         'color_valid'            => '#2ecc71',
         'color_warning'          => '#ff9900',
         'full_row'               => 1,
+        'excluded_states'        => '',          // ids d'états GLPI (séparés par des virgules) : équipements non signalés
     ];
 
     public const DAYS_MIN = 1;
     public const DAYS_MAX = 3650;
 
-    /** @return array{days_before_expiration:int,color_valid:string,color_warning:string,full_row:int} */
+    /** @return array{days_before_expiration:int,color_valid:string,color_warning:string,full_row:int,excluded_states:int[]} */
     public static function get(): array
     {
         try {
@@ -51,12 +52,15 @@ final class Config
             return $errors;
         }
 
-        \Config::setConfigurationValues(self::CONTEXT, self::sanitize([
+        $clean = self::sanitize([
             'days_before_expiration' => $days,
             'color_valid'            => $data['color_valid'],
             'color_warning'          => $data['color_warning'],
             'full_row'               => !empty($data['full_row']) ? 1 : 0,
-        ]));
+            'excluded_states'        => $data['excluded_states'] ?? [],
+        ]);
+        $clean['excluded_states'] = implode(',', $clean['excluded_states']);      // glpi_configs ne stocke que du texte
+        \Config::setConfigurationValues(self::CONTEXT, $clean);
 
         return [];
     }
@@ -71,6 +75,15 @@ final class Config
             'color_valid'            => $color($v['color_valid'], self::DEFAULTS['color_valid']),
             'color_warning'          => $color($v['color_warning'], self::DEFAULTS['color_warning']),
             'full_row'               => (int) (bool) $v['full_row'],
+            'excluded_states'        => self::ids($v['excluded_states'] ?? ''),
         ];
+    }
+
+    /** @return int[] identifiants entiers positifs, sans doublon (liste ou texte « 1,2 ») */
+    private static function ids(mixed $v): array
+    {
+        $list = is_array($v) ? $v : explode(',', (string) $v);
+
+        return array_values(array_unique(array_filter(array_map('intval', $list), static fn(int $i): bool => $i > 0)));
     }
 }

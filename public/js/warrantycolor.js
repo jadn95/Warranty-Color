@@ -19,6 +19,8 @@
     let timer = null;
     let applying = false;
 
+    const CHECKBOX = /^item\[([^\]]+)\]\[(\d+)\]$/;      // case de sélection native des listes GLPI : item[Type][id]
+
     const rowLink = tr => {
         for (const a of tr.querySelectorAll('a[href]')) {
             if (FORM_LINK.test(a.getAttribute('href'))) {
@@ -27,6 +29,19 @@
         }
         return null;
     };
+
+    /**
+     * Identifie une ligne de liste : case de sélection native de GLPI (Type + id, indépendante de l'adresse des fiches)
+     * en priorité, sinon lien vers la fiche. Renvoie la clé d'interrogation et la cellule qui reçoit la pastille.
+     */
+    function rowInfo(tr) {
+        const box = tr.querySelector('input[type="checkbox"][name^="item["]');
+        const m = box && CHECKBOX.exec(box.getAttribute('name'));
+        const link = rowLink(tr);
+        const key = m ? m[1] + ':' + m[2] : (link ? link.getAttribute('href') : null);
+        const cell = tr.querySelector('td[data-searchopt-content-id="1"]') || (link && link.closest('td, th'));
+        return key && cell ? {key, cell} : null;
+    }
 
     function badge(state, color, text) {
         const b = document.createElement('span');
@@ -37,7 +52,6 @@
         }
         b.setAttribute('role', 'img');
         b.setAttribute('aria-label', text);
-        b.setAttribute('tabindex', '0');            // info-bulle accessible au clavier
         b.dataset.tip = text;                       // info-bulle du plugin (couleur suivant l'état), pas celle de GLPI
         const i = document.createElement('i');
         i.className = 'ti ' + ICONS[state];
@@ -46,29 +60,39 @@
         return b;
     }
 
+    /** Charge (en parallèle, par lots) les états des adresses pas encore connues. */
+    async function load(hrefs) {
+        const missing = [...new Set(hrefs.filter(h => !cache.has(h)))];
+        const chunks = [];
+        for (let i = 0; i < missing.length; i += CHUNK) {
+            chunks.push(missing.slice(i, i + CHUNK));
+        }
+        await Promise.all(chunks.map(fetchChunk));
+    }
+
     async function fetchChunk(hrefs) {
-        const qs = hrefs.map(h => 'href[]=' + encodeURIComponent(h)).join('&');
+        const qs = hrefs.map(h => (/^[\w\\]+:\d+$/.test(h) ? 'item[]=' : 'href[]=') + encodeURIComponent(h)).join('&');
         const res = await fetch(STATUS_URL + '?' + qs, {credentials: 'same-origin'});
         if (!res.ok) {
             throw new Error('status ' + res.status);
         }
         const data = await res.json();
-        meta = {config: data.config, labels: data.labels, colors: data.colors};
+        meta = {config: data.config, labels: data.labels, colors: data.colors, types: data.types || []};
         for (const h of hrefs) {
             cache.set(h, data.items[h] || null);
         }
     }
 
-    function applyRow(tr, a, info) {
+    function applyRow(tr, cell, info) {
         tr.dataset.warranty = info.state;
         if (info.color) {
             tr.style.setProperty('--warranty-color', info.color);
         }
         tr.querySelector('.warranty-badge')?.remove();
-        a.closest('td, th')?.appendChild(badge(info.state, info.color, info.label));
+        cell.appendChild(badge(info.state, info.color, info.label));
     }
 
-    function addLegend(table) {
+    function addLegend(table, listType) {
         if (!meta || table.dataset.warrantyLegend) {
             return;
         }
@@ -76,9 +100,33 @@
         const legend = document.createElement('div');
         legend.className = 'warranty-legend';
         legend.setAttribute('aria-label', meta.labels.title);
+        const title = document.createElement('span');
+        title.className = 'warranty-legend-title';
+        title.textContent = meta.labels.title + ' :';
+        legend.appendChild(title);
+        // type d'équipement de la liste : celui de la page (formulaire de recherche GLPI), sinon celui d'une ligne signalée
+        let type = listType;
+        for (const tr of type ? [] : table.querySelectorAll('tbody tr')) {
+            const r = rowInfo(tr);
+            type = r && cache.get(r.key)?.itemtype;
+            if (type) {
+                break;
+            }
+        }
         for (const state of ['valid', 'warning', 'expired']) {
-            const item = document.createElement('span');
-            item.appendChild(badge(state, meta.colors[state], meta.labels[state]));
+            const item = document.createElement(type ? 'a' : 'span');
+            if (type) {          // clic : liste de tous les équipements du type dans cet état (toutes les pages)
+                item.href = BASE + '/front/list.php?itemtype=' + encodeURIComponent(type) + '&state=' + state;
+                item.className = 'warranty-legend-link';
+                item.title = meta.labels.list.replace('%s', meta.labels[state]);
+            }
+            const b = badge(state, meta.colors[state], meta.labels[state]);
+            b.removeAttribute('tabindex');       // la légende porte déjà le texte : pas de seconde info-bulle
+            b.removeAttribute('role');
+            b.removeAttribute('aria-label');
+            b.setAttribute('aria-hidden', 'true');
+            delete b.dataset.tip;
+            item.appendChild(b);
             item.appendChild(document.createTextNode(meta.labels[state]));
             legend.appendChild(item);
         }
@@ -95,31 +143,31 @@
             for (const table of document.querySelectorAll('table.search-results')) {
                 const todo = [];
                 for (const tr of table.querySelectorAll('tbody tr:not([data-warranty-done])')) {
-                    const a = rowLink(tr);
-                    if (a) {
-                        todo.push({tr, a, href: a.getAttribute('href')});
+                    const r = rowInfo(tr);
+                    if (r) {
+                        todo.push({tr, ...r});
                     }
                 }
-                const missing = [...new Set(todo.map(t => t.href).filter(h => !cache.has(h)))];
-                const chunks = [];
-                for (let i = 0; i < missing.length; i += CHUNK) {
-                    chunks.push(missing.slice(i, i + CHUNK));
+                await load(todo.map(t => t.key));
+                // Type de la liste affichée (attribut posé par GLPI sur le formulaire de recherche) : la légende n'attend pas une ligne signalée.
+                const listType = table.closest('form[data-search-itemtype]')?.dataset.searchItemtype || null;
+                if (listType && !meta) {
+                    await fetchChunk([]);
                 }
-                await Promise.all(chunks.map(fetchChunk));
 
                 applying = true;
                 let any = false;
-                for (const {tr, a, href} of todo) {
-                    const info = cache.get(href);
+                for (const {tr, key, cell} of todo) {
+                    const info = cache.get(key);
                     if (info) {
-                        applyRow(tr, a, info);
+                        applyRow(tr, cell, info);
                         any = true;
                     }
                     tr.setAttribute('data-warranty-done', '1');     // posé après succès : un échec sera retenté
                 }
-                if (any && meta) {
+                if (meta && (any || (listType && meta.types.includes(listType)))) {
                     table.classList.toggle('warranty-fullrow', !!meta.config.full_row);
-                    addLegend(table);
+                    addLegend(table, listType && meta.types.includes(listType) ? listType : null);
                 }
                 applying = false;
             }
@@ -128,12 +176,7 @@
             const links = [...document.querySelectorAll('.accordion-items a[href]:not([data-warranty-done])')]
                 .filter(a => FORM_LINK.test(a.getAttribute('href')));
             if (links.length) {
-                const missing = [...new Set(links.map(a => a.getAttribute('href')).filter(h => !cache.has(h)))];
-                const chunks = [];
-                for (let i = 0; i < missing.length; i += CHUNK) {
-                    chunks.push(missing.slice(i, i + CHUNK));
-                }
-                await Promise.all(chunks.map(fetchChunk));
+                await load(links.map(a => a.getAttribute('href')));
 
                 applying = true;
                 for (const a of links) {
@@ -159,6 +202,35 @@
             }
         }
     }
+
+    // Info-bulle flottante partagée (survol ou focus clavier d'une pastille) : placée dans la fenêtre, jamais rognée.
+    let tipEl = null;
+    function showTip(badge) {
+        hideTip();
+        tipEl = document.createElement('div');
+        tipEl.className = 'warranty-tooltip';
+        tipEl.setAttribute('role', 'tooltip');
+        tipEl.textContent = badge.dataset.tip;
+        tipEl.style.setProperty('--wc', getComputedStyle(badge).getPropertyValue('--wc'));
+        document.body.appendChild(tipEl);
+        const r = badge.getBoundingClientRect();
+        const t = tipEl.getBoundingClientRect();
+        const left = Math.max(8, Math.min(window.innerWidth - t.width - 8, r.left + r.width / 2 - t.width / 2));
+        const top = r.top - t.height - 6 >= 8 ? r.top - t.height - 6 : r.bottom + 6;    // sous la pastille si pas de place au-dessus
+        tipEl.style.left = left + 'px';
+        tipEl.style.top = top + 'px';
+    }
+    function hideTip() {
+        tipEl?.remove();
+        tipEl = null;
+    }
+    const tipTarget = e => e.target.closest?.('.warranty-badge[data-tip]');
+    document.addEventListener('mouseover', e => { const b = tipTarget(e); if (b) showTip(b); });
+    document.addEventListener('mouseout', e => { if (tipTarget(e)) hideTip(); });
+    document.addEventListener('focusin', e => { const b = tipTarget(e); if (b) showTip(b); });
+    document.addEventListener('focusout', hideTip);
+    document.addEventListener('scroll', hideTip, true);
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') hideTip(); });     // WCAG 1.4.13 : info-bulle fermable au clavier
 
     function schedule() {
         clearTimeout(timer);

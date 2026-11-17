@@ -4,6 +4,8 @@ use GlpiPlugin\Warrantycolor\Config;
 
 include __DIR__ . '/../../../inc/includes.php';
 
+global $CFG_GLPI, $DB;        // les pages de plugin sont exécutées dans une fonction : les globales ne sont pas toujours visibles
+
 Session::checkRight('config', UPDATE);
 
 if (isset($_POST['update'])) {
@@ -21,13 +23,15 @@ if (isset($_POST['update'])) {
 $conf = Config::get();
 $d    = Config::DEFAULTS;
 $e    = static fn($v): string => htmlspecialchars((string) $v);
+// Adresse réelle de la page : PHP_SELF vaut « /index.php » sous GLPI 12, ce qui enverrait le formulaire au point d'entrée d'inventaire (« XML not well formed »).
+$self = $CFG_GLPI['root_doc'] . '/plugins/warrantycolor/front/config.php';
 
-Html::header(__('Warranty Color', 'warrantycolor'), $_SERVER['PHP_SELF'], 'config', 'plugins');
+Html::header(__('Warranty Color', 'warrantycolor'), $self, 'config', 'plugins');
 
 echo "<div class='container-fluid'><div class='card' style='max-width: 48rem'><div class='card-header'><h3 class='card-title'>"
     . $e(__('Warranty Color — configuration', 'warrantycolor')) . "</h3></div><div class='card-body'>";
 
-echo "<form method='post' action='" . $e($_SERVER['PHP_SELF']) . "' id='wc-config-form'"
+echo "<form method='post' action='" . $e($self) . "' id='wc-config-form'"
     . " data-default-days='{$d['days_before_expiration']}' data-default-valid='{$d['color_valid']}'"
     . " data-default-warning='{$d['color_warning']}' data-default-full-row='{$d['full_row']}'>";
 // GLPI 12 gère le jeton CSRF automatiquement ; seule la 11 attend encore le champ.
@@ -45,6 +49,14 @@ foreach (['color_valid' => [__('Couleur « garantie valide »', 'warrantycolor')
         . "<div class='d-flex align-items-center gap-2'><input id='$id' name='$name' type='color' class='form-control form-control-color' value='" . $e($conf[$name]) . "'>"
         . "<code data-hex-for='$name'>" . $e($conf[$name]) . "</code></div></div>";
 }
+
+$options = '';
+foreach ($DB->request(['SELECT' => ['id', 'completename'], 'FROM' => 'glpi_states', 'ORDER' => 'completename']) as $row) {
+    $options .= "<option value='" . (int) $row['id'] . "'" . (in_array((int) $row['id'], $conf['excluded_states'], true) ? ' selected' : '') . '>' . $e($row['completename']) . '</option>';
+}
+echo "<div class='mb-3'><label class='form-label' for='wc-states'>" . $e(__('États à ne pas signaler', 'warrantycolor')) . "</label>"
+    . "<select id='wc-states' name='excluded_states[]' class='form-select' multiple size='5' aria-describedby='wc-states-help'>$options</select>"
+    . "<div class='form-text' id='wc-states-help'>" . $e(__('Les équipements dans ces états (ex. retiré, perdu) n\'ont ni pastille ni teinte, et sont absents des listes de la légende. Ctrl+clic pour en choisir plusieurs.', 'warrantycolor')) . "</div></div>";
 
 echo "<div class='mb-3'><label class='form-check'><input type='checkbox' class='form-check-input' name='full_row' value='1'" . ($conf['full_row'] ? ' checked' : '') . ">"
     . "<span class='form-check-label'>" . $e(__('Teinter toute la ligne (sinon : pastille et repère latéral seulement)', 'warrantycolor')) . "</span></label></div>";

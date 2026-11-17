@@ -11,16 +11,18 @@ use GlpiPlugin\Warrantycolor\Warranty;
 $today = new DateTimeImmutable('2026-11-16');
 $cases = [
     // date, durée (mois), délai d'alerte, état attendu
-    ['2026-01-01', 12, 30, 'valid'],        // fin le 2027-01-01 : dans 46 j
-    ['2025-12-20', 12, 30, 'valid'],        // fin le 2026-12-20 : dans 34 j
-    ['2025-12-01', 12, 30, 'warning'],      // fin le 2026-12-01 : dans 15 j
-    ['2025-11-16', 12, 30, 'warning'],      // fin aujourd'hui : 0 j
-    ['2025-11-15', 12, 30, 'expired'],      // fin hier
+    ['2026-01-01', 12, 30, 'valid'],        // dernier jour 2026-12-31 : dans 45 j
+    ['2025-12-20', 12, 30, 'valid'],        // dernier jour 2026-12-19 : dans 33 j
+    ['2025-12-01', 12, 30, 'warning'],      // dernier jour 2026-11-30 : dans 14 j
+    ['2025-11-17', 12, 30, 'warning'],      // dernier jour aujourd'hui : 0 j
+    ['2025-11-16', 12, 30, 'expired'],      // dernier jour hier
     ['2020-01-01', 0, 30, 'none'],          // durée 0 : non renseignée
     ['2020-01-01', -1, 30, 'valid'],        // à vie
     [null, 12, 30, 'none'],
     ['0000-00-00', 12, 30, 'none'],
     ['2024-00-00', 12, 30, 'none'],         // date corrompue : ignorée, pas d'exception
+    ['2025-12-17', 12, 30, 'warning'],      // dernier jour 2026-12-16 : 30 j = borne incluse
+    ['2025-12-18', 12, 30, 'valid'],        // dernier jour 2026-12-17 : 31 j
     ['2026-01-31', 1, 30, 'expired'],       // 31 janvier + 1 mois = 3 mars 2026
 ];
 $fail = 0;

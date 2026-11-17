@@ -2,7 +2,7 @@
 
 use Glpi\Plugin\Hooks;
 
-define('PLUGIN_WARRANTYCOLOR_VERSION', '2.0.0');
+define('PLUGIN_WARRANTYCOLOR_VERSION', '2.1.0');
 define('PLUGIN_WARRANTYCOLOR_MIN_GLPI', '11.0.0');
 
 function plugin_init_warrantycolor(): void
