@@ -1,5 +1,8 @@
 # Changelog
 
+## 2.1.1
+- Les navigateurs gardaient l'ancien `config.js`/CSS après une mise à jour (GLPI dérive le paramètre `?v=` des fichiers de la version du plugin) : la version est incrémentée. **Règle : changer `PLUGIN_WARRANTYCOLOR_VERSION` à chaque modification de `public/`**, sinon un Ctrl+F5 est nécessaire.
+
 ## 2.1.0
 - Légende **cliquable** : un clic sur « Garantie valide », « Expire dans N jours » ou « Expirée » ouvre une recherche GLPI native (option « Date d'expiration de la garantie ») listant tous les équipements du type dans cet état, triés par date de fin. La légende s'affiche sur toute liste d'équipements, même sans équipement signalé sur la page (type lu sur le formulaire de recherche de GLPI).
 - Date affichée alignée sur la fiche GLPI : dernier jour de garantie = début + durée − 1 jour ; expirée à partir du lendemain.
@@ -12,6 +15,7 @@
 - Repli visuel pour les navigateurs sans `color-mix()`.
 - Tests : bornes du délai d'alerte.
 - Twig : la page de configuration (`templates/config.html.twig`) et le bandeau des fiches (`templates/banner.html.twig`) utilisent les modèles Twig de GLPI (échappement automatique, plus de HTML assemblé à la main).
+- Page de configuration reconstruite avec les **macros de formulaire de GLPI** (`largeTitle`, `numberField`, `colorField` avec sélecteur Spectrum, `dropdownArrayField` Select2 multiple, `checkboxField`), sections Seuil / Couleurs / Exclusions / Affichage / Aperçu, aides en infobulle « ? », pied de carte natif (Sauvegarder à droite). L'aperçu écoute les événements jQuery de ces composants.
 - Page de configuration (revue UX/accessibilité) : aides lisibles en thème sombre, états à exclure en cases à cocher (plus de Ctrl+clic), aperçu qui suit le délai saisi, message annoncé après « Valeurs par défaut », avertissement avant de quitter avec des modifications non enregistrées (`data-track-changes`), icônes sur les boutons et les alertes, styles dans la feuille du plugin.
 - Prérequis : `plugin_warrantycolor_check_prerequisites` vérifie `Infocom` et le moteur Twig de GLPI (message affiché, plugin désactivé par GLPI sinon). La page de configuration affiche des **avertissements** (droit sur les informations financières manquant, aucun type d'équipement avec informations financières, états exclus supprimés).
 - Compatibilité déclarée : GLPI 12.0 (testé sur 12.0.2) ; la gestion du jeton CSRF de GLPI 11 est conservée au cas où, sans support annoncé.

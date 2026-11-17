@@ -114,53 +114,69 @@ msgstr ""
 msgid "Garantie non renseignée"
 msgstr ""
 
-#: templates/config.html.twig:10
+#: templates/config.html.twig:15
 msgid "Warranty Color — configuration"
 msgstr ""
 
-#: templates/config.html.twig:22
+#: templates/config.html.twig:28
 msgid "Valeurs par défaut rétablies : pensez à enregistrer."
 msgstr ""
 
-#: templates/config.html.twig:27
+#: templates/config.html.twig:33
+msgid "Seuil d'alerte"
+msgstr ""
+
+#: templates/config.html.twig:34
 msgid "Alerte avant expiration (jours)"
 msgstr ""
 
-#: templates/config.html.twig:30
+#: templates/config.html.twig:39
 msgid "Une garantie qui expire dans ce délai est signalée en orange."
 msgstr ""
 
-#: templates/config.html.twig:30
+#: templates/config.html.twig:39
 #, php-format
 msgid "Valeurs possibles : %1$d à %2$d jours."
 msgstr ""
 
-#: templates/config.html.twig:34
+#: templates/config.html.twig:42
+msgid "Couleurs"
+msgstr ""
+
+#: templates/config.html.twig:43
 msgid "Couleur « garantie valide »"
 msgstr ""
 
-#: templates/config.html.twig:42
+#: templates/config.html.twig:44
 msgid "Couleur « expiration proche »"
 msgstr ""
 
-#: templates/config.html.twig:50
+#: templates/config.html.twig:46
+msgid "Exclusions"
+msgstr ""
+
+#: templates/config.html.twig:47
 msgid "États à ne pas signaler"
 msgstr ""
 
-#: templates/config.html.twig:59
+#: templates/config.html.twig:50
 msgid ""
 "Les équipements dans ces états (ex. retiré, perdu) n'ont ni pastille ni "
 "teinte, et sont absents des listes de la légende."
 msgstr ""
 
-#: templates/config.html.twig:65
+#: templates/config.html.twig:53
+msgid "Affichage"
+msgstr ""
+
+#: templates/config.html.twig:54
 msgid "Teinter toute la ligne (sinon : pastille et repère latéral seulement)"
 msgstr ""
 
-#: templates/config.html.twig:71
+#: templates/config.html.twig:56 templates/config.html.twig:58
 msgid "Aperçu"
 msgstr ""
 
-#: templates/config.html.twig:86
+#: templates/config.html.twig:72
 msgid "Valeurs par défaut"
 msgstr ""

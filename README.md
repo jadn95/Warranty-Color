@@ -42,7 +42,7 @@ Calcul : dernier jour de garantie = date de début + durée en mois − 1 jour (
 - `php tests/compute_test.php` : tests du calcul d'état (sans base).
 - Le clic sur la légende lance une recherche GLPI native (option « Date d'expiration de la garantie ») qui remplace les filtres de la liste ; « Réinitialiser » dans la recherche GLPI revient à la liste complète.
 - Textes en français encapsulés dans `__('…', 'warrantycolor')` ; `locales/warrantycolor.pot` sert de modèle pour une nouvelle langue (`msginit -l en_GB -i locales/warrantycolor.pot -o locales/en_GB.po`, puis `msgfmt` pour le `.mo`).
-- `templates/` : modèles Twig (page de configuration, bandeau) rendus par `TemplateRenderer` ; après ajout ou modification d'un modèle, `php bin/console cache:clear`.
+- `templates/` : modèles Twig (page de configuration construite avec les macros `components/form/fields_macros.html.twig` de GLPI, bandeau) rendus par `TemplateRenderer` ; après ajout ou modification d'un modèle, `php bin/console cache:clear`.
 - `warrantycolor.xml` : descripteur pour le catalogue des plugins GLPI (version, compatibilité, licence).
 - Compatibilité : GLPI 12.0 (testé sur 12.0.2), PHP 8.2 ; pas de borne maximale, à revalider à chaque version majeure. Le code garde la gestion du jeton CSRF de GLPI 11 « au cas où », sans que cette version soit supportée ni testée.
 - Prérequis contrôlés au chargement (`plugin_warrantycolor_check_prerequisites`) : informations financières (`Infocom`) et moteur Twig de GLPI. S'ils manquent, GLPI désactive le plugin et affiche le message ; il faut le réactiver ensuite.

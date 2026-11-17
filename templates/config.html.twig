@@ -1,9 +1,14 @@
-{# Page de configuration de Warranty Color. Variables : action, conf, defaults, days_min, days_max, states, warnings, needs_csrf. #}
+{# Page de configuration de Warranty Color, construite avec les macros de formulaire de GLPI.
+   Variables : action, conf, defaults, days_min, days_max, states_map (id => nom), warnings, needs_csrf. #}
+{% import 'components/form/fields_macros.html.twig' as fields %}
+
+{% set field_options = {field_class: 'col-12', label_class: 'col-xxl-5', input_class: 'col-xxl-7'} %}
 {% set preview = [
     {state: 'valid', icon: 'ti-shield-check', text: __('Garantie valide', 'warrantycolor')},
     {state: 'warning', icon: 'ti-alert-triangle', text: __('Expire dans %d jours ou moins', 'warrantycolor')|format(conf.days_before_expiration)},
     {state: 'expired', icon: 'ti-shield-off', text: __('Expirée', 'warrantycolor')},
 ] %}
+
 <div class="container-fluid">
     <div class="card wc-card">
         <div class="card-header">
@@ -15,76 +20,58 @@
                     <i class="ti {{ warning.level == 'danger' ? 'ti-alert-circle' : 'ti-alert-triangle' }} me-2" aria-hidden="true"></i>{{ warning.text }}
                 </div>
             {% endfor %}
+
             <form method="post" action="{{ action }}" id="wc-config-form" data-track-changes="true"
                   data-default-days="{{ defaults.days_before_expiration }}" data-default-valid="{{ defaults.color_valid }}"
                   data-default-warning="{{ defaults.color_warning }}" data-default-full-row="{{ defaults.full_row }}"
                   data-warning-label="{{ __('Expire dans %d jours ou moins', 'warrantycolor') }}"
                   data-reset-message="{{ __('Valeurs par défaut rétablies : pensez à enregistrer.', 'warrantycolor') }}">
                 {# GLPI 12 gère le jeton CSRF automatiquement ; seule la 11 attend encore le champ. #}
-                {% if needs_csrf %}<input type="hidden" name="_glpi_csrf_token" value="{{ csrf_token() }}">{% endif %}
+                {% if needs_csrf %}{{ fields.csrfField() }}{% endif %}
 
-                <div class="mb-3">
-                    <label class="form-label" for="wc-days">{{ __('Alerte avant expiration (jours)', 'warrantycolor') }}</label>
-                    <input id="wc-days" name="days_before_expiration" type="number" class="form-control wc-days" required
-                           min="{{ days_min }}" max="{{ days_max }}" value="{{ conf.days_before_expiration }}" aria-describedby="wc-days-help">
-                    <div class="wc-help" id="wc-days-help">{{ __('Une garantie qui expire dans ce délai est signalée en orange.', 'warrantycolor') }} {{ __('Valeurs possibles : %1$d à %2$d jours.', 'warrantycolor')|format(days_min, days_max) }}</div>
-                </div>
+                <div class="row">
+                    {{ fields.largeTitle(__('Seuil d\'alerte', 'warrantycolor'), 'ti ti-hourglass-high', true) }}
+                    {{ fields.numberField('days_before_expiration', conf.days_before_expiration, __('Alerte avant expiration (jours)', 'warrantycolor'), field_options|merge({
+                        id: 'wc-days',
+                        min: days_min,
+                        max: days_max,
+                        required: true,
+                        helper: __('Une garantie qui expire dans ce délai est signalée en orange.', 'warrantycolor') ~ ' ' ~ __('Valeurs possibles : %1$d à %2$d jours.', 'warrantycolor')|format(days_min, days_max),
+                    })) }}
 
-                <div class="mb-3">
-                    <label class="form-label" for="wc-valid">{{ __('Couleur « garantie valide »', 'warrantycolor') }}</label>
-                    <div class="d-flex align-items-center gap-2">
-                        <input id="wc-valid" name="color_valid" type="color" class="form-control form-control-color" value="{{ conf.color_valid }}" aria-describedby="wc-valid-hex">
-                        <code class="wc-hex" id="wc-valid-hex" data-hex-for="color_valid">{{ conf.color_valid }}</code>
+                    {{ fields.largeTitle(__('Couleurs', 'warrantycolor'), 'ti ti-palette') }}
+                    {{ fields.colorField('color_valid', conf.color_valid, __('Couleur « garantie valide »', 'warrantycolor'), field_options|merge({id: 'wc-valid'})) }}
+                    {{ fields.colorField('color_warning', conf.color_warning, __('Couleur « expiration proche »', 'warrantycolor'), field_options|merge({id: 'wc-warning'})) }}
+
+                    {{ fields.largeTitle(__('Exclusions', 'warrantycolor'), 'ti ti-filter-off') }}
+                    {{ fields.dropdownArrayField('excluded_states', '', states_map, __('États à ne pas signaler', 'warrantycolor'), field_options|merge({
+                        multiple: true,
+                        values: conf.excluded_states,
+                        helper: __("Les équipements dans ces états (ex. retiré, perdu) n'ont ni pastille ni teinte, et sont absents des listes de la légende.", 'warrantycolor'),
+                    })) }}
+
+                    {{ fields.largeTitle(__('Affichage', 'warrantycolor'), 'ti ti-layout-list') }}
+                    {{ fields.checkboxField('full_row', conf.full_row, __('Teinter toute la ligne (sinon : pastille et repère latéral seulement)', 'warrantycolor'), field_options|merge({id: 'wc-full-row'})) }}
+
+                    {{ fields.largeTitle(__('Aperçu', 'warrantycolor'), 'ti ti-eye') }}
+                    <div class="col-12 mb-3">
+                        <table class="table table-sm table-striped wc-preview" id="wc-preview" aria-label="{{ __('Aperçu', 'warrantycolor') }}">
+                            <tbody>
+                                {% for item in preview %}
+                                    <tr{% if item.state != 'expired' %} data-warranty="{{ item.state }}"{% endif %}>
+                                        <td>PC-{{ item.state|upper }}<span class="warranty-badge" data-state="{{ item.state }}" role="img" aria-label="{{ item.text }}" data-tip="{{ item.text }}"><i class="ti {{ item.icon }}" aria-hidden="true"></i></span></td>
+                                        <td>{{ item.text }}</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
                     </div>
                 </div>
 
-                <div class="mb-3">
-                    <label class="form-label" for="wc-warning">{{ __('Couleur « expiration proche »', 'warrantycolor') }}</label>
-                    <div class="d-flex align-items-center gap-2">
-                        <input id="wc-warning" name="color_warning" type="color" class="form-control form-control-color" value="{{ conf.color_warning }}" aria-describedby="wc-warning-hex">
-                        <code class="wc-hex" id="wc-warning-hex" data-hex-for="color_warning">{{ conf.color_warning }}</code>
-                    </div>
-                </div>
-
-                <fieldset class="mb-3">
-                    <legend class="form-label">{{ __('États à ne pas signaler', 'warrantycolor') }}</legend>
-                    <div class="wc-states" id="wc-states" role="group" aria-describedby="wc-states-help">
-                        {% for state in states %}
-                            <label class="form-check">
-                                <input type="checkbox" class="form-check-input" name="excluded_states[]" value="{{ state.id }}"{% if state.id in conf.excluded_states %} checked{% endif %}>
-                                <span class="form-check-label">{{ state.name }}</span>
-                            </label>
-                        {% endfor %}
-                    </div>
-                    <div class="wc-help" id="wc-states-help">{{ __("Les équipements dans ces états (ex. retiré, perdu) n'ont ni pastille ni teinte, et sont absents des listes de la légende.", 'warrantycolor') }}</div>
-                </fieldset>
-
-                <div class="mb-3">
-                    <label class="form-check">
-                        <input type="checkbox" class="form-check-input" name="full_row" value="1"{% if conf.full_row %} checked{% endif %}>
-                        <span class="form-check-label">{{ __('Teinter toute la ligne (sinon : pastille et repère latéral seulement)', 'warrantycolor') }}</span>
-                    </label>
-                </div>
-
-                {# Aperçu en direct (mis à jour par public/js/config.js) #}
-                <div class="mb-3">
-                    <div class="form-label" id="wc-preview-title">{{ __('Aperçu', 'warrantycolor') }}</div>
-                    <table class="table table-sm table-striped wc-preview" id="wc-preview" aria-labelledby="wc-preview-title">
-                        <tbody>
-                            {% for item in preview %}
-                                <tr{% if item.state != 'expired' %} data-warranty="{{ item.state }}"{% endif %}>
-                                    <td>PC-{{ item.state|upper }}<span class="warranty-badge" data-state="{{ item.state }}" role="img" aria-label="{{ item.text }}" data-tip="{{ item.text }}"><i class="ti {{ item.icon }}" aria-hidden="true"></i></span></td>
-                                    <td>{{ item.text }}</td>
-                                </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-
-                <div class="d-flex align-items-center flex-wrap gap-2">
-                    <button type="submit" name="update" class="btn btn-primary"><i class="ti ti-device-floppy me-1" aria-hidden="true"></i>{{ _x('button', 'Save') }}</button>
-                    <button type="button" id="wc-reset" class="btn btn-outline-secondary"><i class="ti ti-restore me-1" aria-hidden="true"></i>{{ __('Valeurs par défaut', 'warrantycolor') }}</button>
+                <div class="card-footer mx-n2 d-flex align-items-center flex-wrap gap-2">
+                    <button type="button" id="wc-reset" class="btn btn-outline-secondary"><i class="ti ti-restore" aria-hidden="true"></i> <span>{{ __('Valeurs par défaut', 'warrantycolor') }}</span></button>
                     <span class="wc-help" id="wc-live" role="status" aria-live="polite"></span>
+                    <button type="submit" name="update" value="1" class="ms-auto btn btn-primary"><i class="ti ti-device-floppy" aria-hidden="true"></i> <span>{{ _x('button', 'Save') }}</span></button>
                 </div>
             </form>
         </div>
