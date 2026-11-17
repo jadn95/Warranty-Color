@@ -118,7 +118,9 @@
             if (type) {          // clic : liste de tous les équipements du type dans cet état (toutes les pages)
                 item.href = BASE + '/front/list.php?itemtype=' + encodeURIComponent(type) + '&state=' + state;
                 item.className = 'warranty-legend-link';
-                item.title = meta.labels.list.replace('%s', meta.labels[state]);
+                const hint = meta.labels.list.replace('%s', meta.labels[state]);
+                item.dataset.tip = hint;                 // info-bulle du plugin (couleur de l'état) : un attribut title donnerait celle, bleue, de GLPI
+                item.setAttribute('aria-label', hint);
             }
             const b = badge(state, meta.colors[state], meta.labels[state]);
             b.removeAttribute('tabindex');       // la légende porte déjà le texte : pas de seconde info-bulle
@@ -211,7 +213,8 @@
         tipEl.className = 'warranty-tooltip';
         tipEl.setAttribute('role', 'tooltip');
         tipEl.textContent = badge.dataset.tip;
-        tipEl.style.setProperty('--wc', getComputedStyle(badge).getPropertyValue('--wc'));
+        const colored = badge.matches('.warranty-badge') ? badge : badge.querySelector('.warranty-badge');       // lien de légende : couleur de sa pastille
+        tipEl.style.setProperty('--wc', getComputedStyle(colored || badge).getPropertyValue('--wc'));
         document.body.appendChild(tipEl);
         const r = badge.getBoundingClientRect();
         const t = tipEl.getBoundingClientRect();
@@ -224,7 +227,7 @@
         tipEl?.remove();
         tipEl = null;
     }
-    const tipTarget = e => e.target.closest?.('.warranty-badge[data-tip]');
+    const tipTarget = e => e.target.closest?.('.warranty-badge[data-tip], .warranty-legend-link[data-tip]');
     document.addEventListener('mouseover', e => { const b = tipTarget(e); if (b) showTip(b); });
     document.addEventListener('mouseout', e => { if (tipTarget(e)) hideTip(); });
     document.addEventListener('focusin', e => { const b = tipTarget(e); if (b) showTip(b); });

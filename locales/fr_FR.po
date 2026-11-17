@@ -61,8 +61,8 @@ msgstr "moteur de modèles Twig de GLPI"
 
 #: setup.php:56
 #, php-format
-msgid "Warranty Color : composant manquant — %s."
-msgstr "Warranty Color : composant manquant — %s."
+msgid "Warranty Color : composant manquant : %s."
+msgstr "Warranty Color : composant manquant : %s."
 
 #: src/Alert.php:38
 msgid "Mail de fin de garantie"
@@ -295,8 +295,8 @@ msgid "Mails automatiques"
 msgstr "Mails automatiques"
 
 #: templates/config.html.twig:19
-msgid "Warranty Color — configuration"
-msgstr "Warranty Color — configuration"
+msgid "Configuration de Warranty Color"
+msgstr "Configuration de Warranty Color"
 
 #: templates/config.html.twig:33
 msgid "(modifié)"

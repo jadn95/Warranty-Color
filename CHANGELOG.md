@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.2.2
+- Teinte de ligne complète : s'étend à toute la ligne (la bande alternée du thème en recouvrait une partie).
+- Info-bulle des éléments cliquables de la légende : couleur de l'état, comme celle des pastilles (et non le bleu de GLPI).
+
 ## 2.2.1
 - **Mails automatiques** à l'utilisateur affecté à un équipement dont la garantie arrive à échéance (même délai d'alerte que la pastille orange), avec la date limite pour signaler un problème (la moitié du délai) afin de faire jouer l'assurance.
   - Action automatique quotidienne `WarrantyAlerts` (Configuration > Actions automatiques), notifications et gabarits GLPI natifs (`Alert`, `NotificationTargetAlert`), table de suivi `glpi_plugin_warrantycolor_alerts` : un mail par équipement et par période de garantie (une garantie prolongée redéclenche un mail).

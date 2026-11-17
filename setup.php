@@ -2,7 +2,7 @@
 
 use Glpi\Plugin\Hooks;
 
-define('PLUGIN_WARRANTYCOLOR_VERSION', '2.2.1');
+define('PLUGIN_WARRANTYCOLOR_VERSION', '2.2.2');
 define('PLUGIN_WARRANTYCOLOR_MIN_GLPI', '12.0.0');
 
 function plugin_init_warrantycolor(): void
@@ -53,7 +53,7 @@ function plugin_warrantycolor_check_prerequisites(): bool
     ];
     foreach ($required as $class => $label) {
         if (!class_exists($class)) {
-            printf(__('Warranty Color : composant manquant — %s.', 'warrantycolor'), $label);
+            printf(__('Warranty Color : composant manquant : %s.', 'warrantycolor'), $label);
 
             return false;
         }

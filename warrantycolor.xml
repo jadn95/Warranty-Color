@@ -23,9 +23,9 @@
     </authors>
     <versions>
         <version>
-            <num>2.2.1</num>
+            <num>2.2.2</num>
             <compatibility>~12.0.0</compatibility>
-            <download_url>https://github.com/jadn95/Warranty-Color/releases/download/2.2.1/warrantycolor-2.2.1.tar.bz2</download_url>
+            <download_url>https://github.com/jadn95/Warranty-Color/releases/download/2.2.2/warrantycolor-2.2.2.tar.bz2</download_url>
         </version>
     </versions>
     <langs>

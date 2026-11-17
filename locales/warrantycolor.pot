@@ -61,7 +61,7 @@ msgstr ""
 
 #: setup.php:56
 #, php-format
-msgid "Warranty Color : composant manquant — %s."
+msgid "Warranty Color : composant manquant : %s."
 msgstr ""
 
 #: src/Alert.php:38
@@ -271,7 +271,7 @@ msgid "Mails automatiques"
 msgstr ""
 
 #: templates/config.html.twig:19
-msgid "Warranty Color — configuration"
+msgid "Configuration de Warranty Color"
 msgstr ""
 
 #: templates/config.html.twig:33

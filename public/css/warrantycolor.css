@@ -49,18 +49,17 @@
 }
 
 /* Teinte légère sur toute la ligne (option) : une seule couche, la bande alternée et le survol du thème restent visibles dessous. */
+/* Les cellules de Tabler peignent leur fond (bande alternée, survol) avec un box-shadow inset : on lui donne la teinte via ses variables,
+   sinon la bande alternée recouvrirait la teinte sur une partie de la ligne. */
 table.warranty-fullrow tr[data-warranty="valid"] > td,
 table.warranty-fullrow tr[data-warranty="warning"] > td {
-    background-image: linear-gradient(
-        color-mix(in srgb, var(--warranty-color) 16%, transparent),
-        color-mix(in srgb, var(--warranty-color) 16%, transparent)
-    );
+    --tblr-table-bg-type: color-mix(in srgb, var(--warranty-color) 16%, transparent);
 }
 
-/* Repère latéral toujours présent, même sans teinte de ligne. */
+/* Repère latéral toujours présent, même sans teinte de ligne (la première cellule garde le fond de sa ligne). */
 tr[data-warranty="valid"] > td:first-child,
 tr[data-warranty="warning"] > td:first-child {
-    box-shadow: inset 4px 0 0 var(--warranty-color);
+    box-shadow: inset 4px 0 0 var(--warranty-color), inset 0 0 0 9999px var(--tblr-table-bg-state, var(--tblr-table-bg-type, transparent));
 }
 
 /* Légende au-dessus des listes */
@@ -125,6 +124,6 @@ tr[data-warranty="warning"] > td:first-child {
     .warranty-badge { background: var(--tblr-bg-surface, #fff); }
     .warranty-tooltip { background: #343a40; }
     table.warranty-fullrow tr[data-warranty="valid"] > td,
-    table.warranty-fullrow tr[data-warranty="warning"] > td { background-image: linear-gradient(rgb(0 0 0 / .05), rgb(0 0 0 / .05)); }
+    table.warranty-fullrow tr[data-warranty="warning"] > td { --tblr-table-bg-type: rgb(0 0 0 / .05); }
     .warranty-banner { background: var(--tblr-bg-surface, #fff); border-color: var(--wc); }
 }
