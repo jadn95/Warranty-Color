@@ -1,5 +1,6 @@
 <?php
 
+use Glpi\Application\View\TemplateRenderer;
 use GlpiPlugin\Warrantycolor\Config;
 use GlpiPlugin\Warrantycolor\Migration;
 use GlpiPlugin\Warrantycolor\Warranty;
@@ -35,11 +36,10 @@ function plugin_warrantycolor_preItemForm(array $params): void
     $colors = ['valid' => $conf['color_valid'], 'warning' => $conf['color_warning'], 'expired' => null];
     $icons  = ['valid' => 'ti-shield-check', 'warning' => 'ti-alert-triangle', 'expired' => 'ti-shield-off'];
     // Mêmes couleurs que dans les listes (configuration du plugin) ; style défini dans warrantycolor.css.
-    printf(
-        '<div class="warranty-banner" data-state="%s" style="%s" role="status"><i class="ti %s me-1" aria-hidden="true"></i>%s</div>',
-        $info['state'],
-        $colors[$info['state']] ? '--warranty-color: ' . $colors[$info['state']] : '',
-        $icons[$info['state']],
-        htmlspecialchars($info['label'])
-    );
+    TemplateRenderer::getInstance()->display('@warrantycolor/banner.html.twig', [
+        'state' => $info['state'],
+        'color' => $colors[$info['state']],
+        'icon'  => $icons[$info['state']],
+        'label' => $info['label'],
+    ]);
 }

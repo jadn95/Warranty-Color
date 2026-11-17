@@ -3,8 +3,6 @@
 use GlpiPlugin\Warrantycolor\Config;
 use GlpiPlugin\Warrantycolor\Warranty;
 
-include __DIR__ . '/../../../inc/includes.php';
-
 Session::checkLoginUser();
 
 $type  = (string) ($_GET['itemtype'] ?? '');

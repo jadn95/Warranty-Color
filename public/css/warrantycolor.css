@@ -106,7 +106,19 @@ tr[data-warranty="warning"] > td:first-child {
     color: var(--tblr-body-color, CanvasText);
 }
 
-/* Aperçu de la page de configuration */
+/* Page de configuration */
+.wc-card { max-width: 48rem; }
+.wc-days { max-width: 8rem; }
+/* Aides et valeurs hexadécimales : couleur du texte du thème (le gris des « form-text » devient illisible en thème sombre). */
+.wc-help { font-size: .85em; color: var(--tblr-body-color); opacity: .8; }
+.wc-hex { color: var(--tblr-body-color); background: transparent; padding: 0; }
+.wc-states {
+    max-height: 12rem;
+    overflow-y: auto;
+    padding: .5rem .75rem;
+    border: 1px solid var(--tblr-border-color, rgb(128 128 128 / .35));
+    border-radius: var(--tblr-border-radius, .25rem);
+}
 .wc-preview td { padding: .5rem .75rem; }
 
 @media (forced-colors: active) {

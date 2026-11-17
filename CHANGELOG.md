@@ -11,6 +11,12 @@
 - Performance : `status.php` libère le verrou de session (lots demandés en parallèle) ; chargement par lots factorisé.
 - Repli visuel pour les navigateurs sans `color-mix()`.
 - Tests : bornes du délai d'alerte.
+- Twig : la page de configuration (`templates/config.html.twig`) et le bandeau des fiches (`templates/banner.html.twig`) utilisent les modèles Twig de GLPI (échappement automatique, plus de HTML assemblé à la main).
+- Page de configuration (revue UX/accessibilité) : aides lisibles en thème sombre, états à exclure en cases à cocher (plus de Ctrl+clic), aperçu qui suit le délai saisi, message annoncé après « Valeurs par défaut », avertissement avant de quitter avec des modifications non enregistrées (`data-track-changes`), icônes sur les boutons et les alertes, styles dans la feuille du plugin.
+- Prérequis : `plugin_warrantycolor_check_prerequisites` vérifie `Infocom` et le moteur Twig de GLPI (message affiché, plugin désactivé par GLPI sinon). La page de configuration affiche des **avertissements** (droit sur les informations financières manquant, aucun type d'équipement avec informations financières, états exclus supprimés).
+- Compatibilité déclarée : GLPI 12.0 (testé sur 12.0.2) ; la gestion du jeton CSRF de GLPI 11 est conservée au cas où, sans support annoncé.
+- Garantie à vie (durée −1) vérifiée sur des données réelles : pastille, bandeau, légende et liste « valide ».
+- Conformité GLPI : `front/*.php` n'inclut plus `inc/includes.php` (déjà chargé par GLPI 11 et 12) ; dossier `locales/` (modèle `warrantycolor.pot`, `fr_FR.po`/`.mo`) ; descripteur `warrantycolor.xml` pour le catalogue des plugins ; `logo-40.png` pour le descripteur.
 
 ## 2.0.0
 - Réécriture : configuration dans `glpi_configs`, état calculé côté serveur, pastille + icône + info-bulle, légende, bandeau sur les fiches, éléments associés des tickets.

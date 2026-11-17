@@ -9,8 +9,6 @@
 use GlpiPlugin\Warrantycolor\Config;
 use GlpiPlugin\Warrantycolor\Warranty;
 
-include __DIR__ . '/../../../inc/includes.php';
-
 Session::checkLoginUser();
 session_write_close();      // lecture seule : libère le verrou de session, les lots demandés en parallèle ne s'attendent plus
 

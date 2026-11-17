@@ -1,0 +1,166 @@
+# Warranty Color — modèle de traduction (les textes d'origine sont en français).
+# Copyright (C) 2026 Andy Tkaczyk
+# Ce fichier est distribué sous la même licence que le plugin (GPL).
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Warranty Color 2.1.0\n"
+"Report-Msgid-Bugs-To: https://github.com/jadn95/Warranty-Color/issues\n"
+"POT-Creation-Date: 2026-11-17 19:13+0100\n"
+"PO-Revision-Date: 2026-11-17 19:13+0100\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+
+#: front/config.php:18
+msgid "Configuration enregistrée"
+msgstr ""
+
+#: front/config.php:31
+msgid "Warranty Color"
+msgstr ""
+
+#: front/status.php:32 src/Config.php:46
+msgid "Garantie valide"
+msgstr ""
+
+#: front/status.php:33
+#, php-format
+msgid "Expire dans %d jours ou moins"
+msgstr ""
+
+#: front/status.php:34
+msgid "Expirée"
+msgstr ""
+
+#: front/status.php:35
+msgid "Garantie"
+msgstr ""
+
+#: front/status.php:36
+#, php-format
+msgid "Lister tous les équipements : %s"
+msgstr ""
+
+#: setup.php:48
+msgid "informations financières de GLPI (garantie)"
+msgstr ""
+
+#: setup.php:49
+msgid "moteur de modèles Twig de GLPI"
+msgstr ""
+
+#: setup.php:53
+#, php-format
+msgid "Warranty Color : composant manquant — %s."
+msgstr ""
+
+#: src/Config.php:44
+#, php-format
+msgid "Le délai d'alerte doit être compris entre %1$d et %2$d jours."
+msgstr ""
+
+#: src/Config.php:46
+msgid "Expiration proche"
+msgstr ""
+
+#: src/Config.php:48
+#, php-format
+msgid "Couleur invalide : %s"
+msgstr ""
+
+#: src/Warranty.php:41
+msgid ""
+"Votre profil n'a pas le droit de voir les informations financières : les "
+"pastilles, le bandeau et la légende ne s'affichent pas pour vous."
+msgstr ""
+
+#: src/Warranty.php:44
+msgid ""
+"Aucun type d'équipement n'a les informations financières activées : il n'y a "
+"rien à signaler."
+msgstr ""
+
+#: src/Warranty.php:50
+msgid ""
+"Certains états exclus n'existent plus dans GLPI : enregistrez la "
+"configuration pour les retirer."
+msgstr ""
+
+#: src/Warranty.php:98
+msgid "Garantie à vie"
+msgstr ""
+
+#: src/Warranty.php:99
+#, php-format
+msgid "Garantie jusqu'au %1$s (dans %2$d j)"
+msgstr ""
+
+#: src/Warranty.php:100
+#, php-format
+msgid "Garantie bientôt expirée : fin le %1$s (dans %2$d j)"
+msgstr ""
+
+#: src/Warranty.php:101
+#, php-format
+msgid "Garantie expirée le %s"
+msgstr ""
+
+#: src/Warranty.php:102
+msgid "Garantie non renseignée"
+msgstr ""
+
+#: templates/config.html.twig:10
+msgid "Warranty Color — configuration"
+msgstr ""
+
+#: templates/config.html.twig:22
+msgid "Valeurs par défaut rétablies : pensez à enregistrer."
+msgstr ""
+
+#: templates/config.html.twig:27
+msgid "Alerte avant expiration (jours)"
+msgstr ""
+
+#: templates/config.html.twig:30
+msgid "Une garantie qui expire dans ce délai est signalée en orange."
+msgstr ""
+
+#: templates/config.html.twig:30
+#, php-format
+msgid "Valeurs possibles : %1$d à %2$d jours."
+msgstr ""
+
+#: templates/config.html.twig:34
+msgid "Couleur « garantie valide »"
+msgstr ""
+
+#: templates/config.html.twig:42
+msgid "Couleur « expiration proche »"
+msgstr ""
+
+#: templates/config.html.twig:50
+msgid "États à ne pas signaler"
+msgstr ""
+
+#: templates/config.html.twig:59
+msgid ""
+"Les équipements dans ces états (ex. retiré, perdu) n'ont ni pastille ni "
+"teinte, et sont absents des listes de la légende."
+msgstr ""
+
+#: templates/config.html.twig:65
+msgid "Teinter toute la ligne (sinon : pastille et repère latéral seulement)"
+msgstr ""
+
+#: templates/config.html.twig:71
+msgid "Aperçu"
+msgstr ""
+
+#: templates/config.html.twig:86
+msgid "Valeurs par défaut"
+msgstr ""

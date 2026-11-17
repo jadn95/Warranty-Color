@@ -1,0 +1,2 @@
+{# Bandeau d'état de la garantie au-dessus de la fiche d'un équipement. Variables : state, color (ou null), icon, label. #}
+<div class="warranty-banner" data-state="{{ state }}"{% if color %} style="--warranty-color: {{ color }}"{% endif %} role="status"><i class="ti {{ icon }} me-1" aria-hidden="true"></i>{{ label }}</div>

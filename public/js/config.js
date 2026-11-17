@@ -8,9 +8,12 @@
             return;
         }
         const preview = document.getElementById('wc-preview');
+        const live = document.getElementById('wc-live');
+        const days = form.elements.days_before_expiration;
         const colorValid = form.elements.color_valid;
         const colorWarning = form.elements.color_warning;
         const fullRow = form.elements.full_row;
+        const stateBoxes = () => form.querySelectorAll('input[name="excluded_states[]"]');
 
         function refresh() {
             preview.classList.toggle('warranty-fullrow', fullRow.checked);
@@ -20,18 +23,32 @@
                 tr.querySelector('.warranty-badge').style.setProperty('--warranty-color', input.value);
                 form.querySelector('[data-hex-for="' + input.name + '"]').textContent = input.value;
             }
+            // Le texte « Expire dans N jours » de l'aperçu suit le délai saisi.
+            const n = parseInt(days.value, 10);
+            if (n > 0) {
+                const text = form.dataset.warningLabel.replace('%d', n);
+                const tr = preview.querySelector('tr[data-warranty="warning"]');
+                const badge = tr.querySelector('.warranty-badge');
+                tr.cells[1].textContent = text;
+                badge.setAttribute('aria-label', text);
+                badge.dataset.tip = text;
+            }
         }
 
-        form.addEventListener('input', refresh);
+        form.addEventListener('input', () => {
+            live.textContent = '';
+            refresh();
+        });
         document.getElementById('wc-reset').addEventListener('click', () => {
-            form.elements.days_before_expiration.value = form.dataset.defaultDays;
+            days.value = form.dataset.defaultDays;
             colorValid.value = form.dataset.defaultValid;
             colorWarning.value = form.dataset.defaultWarning;
             fullRow.checked = form.dataset.defaultFullRow === '1';
-            for (const o of form.elements['excluded_states[]'].options) {
-                o.selected = false;
+            for (const box of stateBoxes()) {
+                box.checked = false;
             }
             refresh();
+            live.textContent = form.dataset.resetMessage;       // annoncé (aria-live) : rien n'est enregistré tant qu'on n'a pas validé
         });
         refresh();
     }

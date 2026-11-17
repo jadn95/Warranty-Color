@@ -3,7 +3,7 @@
 use Glpi\Plugin\Hooks;
 
 define('PLUGIN_WARRANTYCOLOR_VERSION', '2.1.0');
-define('PLUGIN_WARRANTYCOLOR_MIN_GLPI', '11.0.0');
+define('PLUGIN_WARRANTYCOLOR_MIN_GLPI', '12.0.0');
 
 function plugin_init_warrantycolor(): void
 {
@@ -35,8 +35,27 @@ function plugin_version_warrantycolor(): array
     ];
 }
 
+/**
+ * Prérequis au-delà de ceux déclarés dans plugin_version_warrantycolor() (version de GLPI, PHP).
+ * GLPI appelle cette fonction sans argument et capture ce qu'elle affiche pour l'expliquer à l'administrateur ;
+ * elle est appelée à chaque chargement du plugin : pas de requête en base ici.
+ * Un échec désactive le plugin jusqu'à réactivation manuelle : on ne contrôle donc que des composants de GLPI,
+ * jamais les fichiers du plugin lui-même (un déploiement en cours ne doit pas le désactiver).
+ */
 function plugin_warrantycolor_check_prerequisites(): bool
 {
+    $required = [
+        \Infocom::class                                => __('informations financières de GLPI (garantie)', 'warrantycolor'),
+        \Glpi\Application\View\TemplateRenderer::class => __('moteur de modèles Twig de GLPI', 'warrantycolor'),
+    ];
+    foreach ($required as $class => $label) {
+        if (!class_exists($class)) {
+            printf(__('Warranty Color : composant manquant — %s.', 'warrantycolor'), $label);
+
+            return false;
+        }
+    }
+
     return true;
 }
 

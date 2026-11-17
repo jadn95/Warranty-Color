@@ -1,6 +1,6 @@
 # GLPI Warranty Color
 
-Plugin GLPI (11 et 12) qui repère l'état de garantie des équipements directement dans les listes et sur leur fiche.
+Plugin GLPI (12.0) qui repère l'état de garantie des équipements directement dans les listes et sur leur fiche.
 
 | État | Affichage |
 | --- | --- |
@@ -34,14 +34,17 @@ Configuration > Plugins > Warranty Color : délai d'alerte (1 à 3650 jours), co
 
 GLPI n'offre pas de crochet pour colorer les lignes d'une liste. Un script (`public/js/warrantycolor.js`) repère les liens de fiche des tableaux de résultats et interroge `front/status.php` par lots de 40 adresses. Côté serveur, une seule requête par type d'équipement ; seuls les équipements que l'utilisateur a le droit de voir (droit sur le type, sur les informations financières, et entités actives) sont renvoyés.
 
-Calcul : date de début + durée en mois (comme `Infocom::getWarrantyExpir`). Durée −1 = à vie ; durée 0 ou date absente/invalide = non renseignée.
+Calcul : dernier jour de garantie = date de début + durée en mois − 1 jour (la « date d'expiration » affichée par la fiche GLPI) ; expirée à partir du lendemain. Durée −1 = à vie ; durée 0 ou date absente/invalide = non renseignée.
 
 ## Développement
 
 - `src/` : espace de noms `GlpiPlugin\Warrantycolor` (`Warranty` : calcul pur et accès base, `Config`, `Migration`).
 - `php tests/compute_test.php` : tests du calcul d'état (sans base).
 - Le clic sur la légende lance une recherche GLPI native (option « Date d'expiration de la garantie ») qui remplace les filtres de la liste ; « Réinitialiser » dans la recherche GLPI revient à la liste complète.
-- Textes en français encapsulés dans `__('…', 'warrantycolor')` : prêts pour des fichiers `locales/*.po`.
-- Pas de borne de version maximale : à revalider à chaque version majeure de GLPI.
+- Textes en français encapsulés dans `__('…', 'warrantycolor')` ; `locales/warrantycolor.pot` sert de modèle pour une nouvelle langue (`msginit -l en_GB -i locales/warrantycolor.pot -o locales/en_GB.po`, puis `msgfmt` pour le `.mo`).
+- `templates/` : modèles Twig (page de configuration, bandeau) rendus par `TemplateRenderer` ; après ajout ou modification d'un modèle, `php bin/console cache:clear`.
+- `warrantycolor.xml` : descripteur pour le catalogue des plugins GLPI (version, compatibilité, licence).
+- Compatibilité : GLPI 12.0 (testé sur 12.0.2), PHP 8.2 ; pas de borne maximale, à revalider à chaque version majeure. Le code garde la gestion du jeton CSRF de GLPI 11 « au cas où », sans que cette version soit supportée ni testée.
+- Prérequis contrôlés au chargement (`plugin_warrantycolor_check_prerequisites`) : informations financières (`Infocom`) et moteur Twig de GLPI. S'ils manquent, GLPI désactive le plugin et affiche le message ; il faut le réactiver ensuite.
 
 Licence GPLv3 — auteur : Andy Tkaczyk.

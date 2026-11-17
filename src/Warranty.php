@@ -27,6 +27,34 @@ final class Warranty
     }
 
     /**
+     * Points d'attention affichés en tête de la page de configuration (ce qui peut empêcher le plugin de signaler quelque chose
+     * alors qu'il est actif ; les prérequis bloquants sont vérifiés par plugin_warrantycolor_check_prerequisites()).
+     *
+     * @return array<int,array{level:string,text:string}> level : warning ou danger
+     */
+    public static function diagnostics(): array
+    {
+        global $DB;
+
+        $out = [];
+        if (!\Infocom::canView()) {
+            $out[] = ['level' => 'warning', 'text' => __('Votre profil n\'a pas le droit de voir les informations financières : les pastilles, le bandeau et la légende ne s\'affichent pas pour vous.', 'warrantycolor')];
+        }
+        if (!self::getItemtypes()) {
+            $out[] = ['level' => 'danger', 'text' => __('Aucun type d\'équipement n\'a les informations financières activées : il n\'y a rien à signaler.', 'warrantycolor')];
+        }
+        $excluded = Config::get()['excluded_states'];
+        if ($excluded) {
+            $found = count(iterator_to_array($DB->request(['SELECT' => 'id', 'FROM' => 'glpi_states', 'WHERE' => ['id' => $excluded]])));
+            if ($found < count($excluded)) {
+                $out[] = ['level' => 'warning', 'text' => __('Certains états exclus n\'existent plus dans GLPI : enregistrez la configuration pour les retirer.', 'warrantycolor')];
+            }
+        }
+
+        return $out;
+    }
+
+    /**
      * Calcul pur (sans accès base) de l'état d'une garantie.
      *
      * @return array{state:string,until:?string,days:?int}  until : date de fin AAAA-MM-JJ (null = à vie ou inconnue)
