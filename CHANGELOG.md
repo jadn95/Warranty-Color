@@ -1,5 +1,14 @@
 # Changelog
 
+## 2.2.1
+- **Mails automatiques** à l'utilisateur affecté à un équipement dont la garantie arrive à échéance (même délai d'alerte que la pastille orange), avec la date limite pour signaler un problème (la moitié du délai) afin de faire jouer l'assurance.
+  - Action automatique quotidienne `WarrantyAlerts` (Configuration > Actions automatiques), notifications et gabarits GLPI natifs (`Alert`, `NotificationTargetAlert`), table de suivi `glpi_plugin_warrantycolor_alerts` : un mail par équipement et par période de garantie (une garantie prolongée redéclenche un mail).
+  - Options : activation, **mode simulation** (activé par défaut : rien n'est envoyé), copie à l'administrateur de l'entité (service informatique), **autres adresses en copie** saisies dans la configuration (10 au plus, validées, sans doublon), second mail à la moitié du délai, objet et texte du mail modifiables (balises `##item.name##`, `##warranty.end##`…).
+  - Garde-fous : simulation affichée dans la configuration, bouton « Marquer les équipements concernés comme déjà notifiés » (évite l'envoi massif au premier lancement), 200 mails par passage au maximum, équipements sans utilisateur actif ou sans e-mail ignorés et listés, états exclus respectés, case absente d'une requête = valeur enregistrée.
+- Page de configuration en deux onglets (**Affichage** / **Mails automatiques**) dans un seul formulaire ; onglet mémorisé dans l'adresse (`#mails`), pastille « modifié » par onglet.
+- Avertissement quand la copie à l'administrateur est activée sans adresse d'administrateur dans l'entité racine.
+- Traductions : 111 textes.
+
 ## 2.1.1
 - Les navigateurs gardaient l'ancien `config.js`/CSS après une mise à jour (GLPI dérive le paramètre `?v=` des fichiers de la version du plugin) : la version est incrémentée. **Règle : changer `PLUGIN_WARRANTYCOLOR_VERSION` à chaque modification de `public/`**, sinon un Ctrl+F5 est nécessaire.
 

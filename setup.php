@@ -2,7 +2,7 @@
 
 use Glpi\Plugin\Hooks;
 
-define('PLUGIN_WARRANTYCOLOR_VERSION', '2.1.1');
+define('PLUGIN_WARRANTYCOLOR_VERSION', '2.2.1');
 define('PLUGIN_WARRANTYCOLOR_MIN_GLPI', '12.0.0');
 
 function plugin_init_warrantycolor(): void
@@ -14,6 +14,9 @@ function plugin_init_warrantycolor(): void
     // Coloration des listes : feuille de style + script (appel de front/status.php pour les lignes affichées).
     $PLUGIN_HOOKS[Hooks::ADD_CSS]['warrantycolor']        = ['css/warrantycolor.css'];
     $PLUGIN_HOOKS[Hooks::ADD_JAVASCRIPT]['warrantycolor'] = ['js/warrantycolor.js', 'js/config.js'];
+
+    // Mails automatiques : l'objet Alert porte les notifications GLPI (gabarits visibles dans Configuration > Notifications).
+    Plugin::registerClass(\GlpiPlugin\Warrantycolor\Alert::class, ['notificationtemplates_types' => true]);
 
     // Bandeau d'état de la garantie en haut de la fiche d'un équipement.
     $PLUGIN_HOOKS[Hooks::PRE_ITEM_FORM]['warrantycolor'] = 'plugin_warrantycolor_preItemForm';

@@ -43,7 +43,14 @@ final class Warranty
         if (!self::getItemtypes()) {
             $out[] = ['level' => 'danger', 'text' => __('Aucun type d\'équipement n\'a les informations financières activées : il n\'y a rien à signaler.', 'warrantycolor')];
         }
-        $excluded = Config::get()['excluded_states'];
+        $conf = Config::get();
+        if ($conf['notify_enabled'] && $conf['notify_copy_admin']) {
+            $admin = $DB->request(['SELECT' => 'admin_email', 'FROM' => 'glpi_entities', 'WHERE' => ['id' => 0], 'LIMIT' => 1])->current();
+            if (trim((string) ($admin['admin_email'] ?? '')) === '') {
+                $out[] = ['level' => 'warning', 'text' => __('La copie à l\'administrateur de l\'entité est activée, mais l\'entité racine n\'a pas d\'adresse d\'administrateur (Administration > Entités > Notifications) : aucune copie ne partira.', 'warrantycolor')];
+            }
+        }
+        $excluded = $conf['excluded_states'];
         if ($excluded) {
             $found = count(iterator_to_array($DB->request(['SELECT' => 'id', 'FROM' => 'glpi_states', 'WHERE' => ['id' => $excluded]])));
             if ($found < count($excluded)) {

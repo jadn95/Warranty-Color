@@ -16,15 +16,20 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 
-#: front/config.php:18
+#: front/config.php:20
+#, php-format
+msgid "%d équipement(s) marqué(s) comme déjà notifiés."
+msgstr "%d équipement(s) marqué(s) comme déjà notifiés."
+
+#: front/config.php:31
 msgid "Configuration enregistrée"
 msgstr "Configuration enregistrée"
 
-#: front/config.php:31
+#: front/config.php:44
 msgid "Warranty Color"
 msgstr "Warranty Color"
 
-#: front/status.php:32 src/Config.php:46
+#: front/status.php:32 src/Config.php:74
 msgid "Garantie valide"
 msgstr "Garantie valide"
 
@@ -46,32 +51,183 @@ msgstr "Garantie"
 msgid "Lister tous les équipements : %s"
 msgstr "Lister tous les équipements : %s"
 
-#: setup.php:48
+#: setup.php:51
 msgid "informations financières de GLPI (garantie)"
 msgstr "informations financières de GLPI (garantie)"
 
-#: setup.php:49
+#: setup.php:52
 msgid "moteur de modèles Twig de GLPI"
 msgstr "moteur de modèles Twig de GLPI"
 
-#: setup.php:53
+#: setup.php:56
 #, php-format
 msgid "Warranty Color : composant manquant — %s."
 msgstr "Warranty Color : composant manquant — %s."
 
-#: src/Config.php:44
+#: src/Alert.php:38
+msgid "Mail de fin de garantie"
+msgstr "Mail de fin de garantie"
+
+#: src/Alert.php:43 src/Migration.php:35
+msgid ""
+"Envoie aux utilisateurs un mail avant la fin de garantie de leur équipement"
+msgstr ""
+"Envoie aux utilisateurs un mail avant la fin de garantie de leur équipement"
+
+#: src/Alert.php:59
+msgid "Mails automatiques désactivés dans la configuration du plugin."
+msgstr "Mails automatiques désactivés dans la configuration du plugin."
+
+#: src/Alert.php:65
+msgid "Notifications GLPI désactivées : rien n'est envoyé."
+msgstr "Notifications GLPI désactivées : rien n'est envoyé."
+
+#: src/Alert.php:76
+#, php-format
+msgid ""
+"Simulation : %1$d mail(s) seraient envoyés, %2$d équipement(s) ignoré(s)."
+msgstr ""
+"Simulation : %1$d mail(s) seraient envoyés, %2$d équipement(s) ignoré(s)."
+
+#: src/Alert.php:78
+#, php-format
+msgid ""
+"%1$d mail(s) envoyé(s), %2$d équipement(s) ignoré(s), %3$d erreur(s)%4$s."
+msgstr ""
+"%1$d mail(s) envoyé(s), %2$d équipement(s) ignoré(s), %3$d erreur(s)%4$s."
+
+#: src/Alert.php:82
+msgid " ; limite par exécution atteinte, suite demain"
+msgstr " ; limite par exécution atteinte, suite demain"
+
+#: src/Alert.php:234
+msgid "utilisateur introuvable"
+msgstr "utilisateur introuvable"
+
+#: src/Alert.php:242
+msgid "utilisateur inactif"
+msgstr "utilisateur inactif"
+
+#: src/Alert.php:244
+msgid "aucune adresse e-mail"
+msgstr "aucune adresse e-mail"
+
+#: src/Config.php:55
+msgid "Fin de garantie de votre ##item.type## ##item.name##"
+msgstr "Fin de garantie de votre ##item.type## ##item.name##"
+
+#: src/Config.php:60
+msgid ""
+"Bonjour ##user.firstname##,\n"
+"\n"
+"Votre ##item.type## « ##item.name## » (n° de série : ##item.serial##) arrive "
+"en fin de garantie le ##warranty.end##, dans ##warranty.days## jours.\n"
+"\n"
+"Si vous constatez un problème sur ce matériel (panne, dysfonctionnement, "
+"casse), merci de le signaler au service informatique avant le ##warranty."
+"report_by## (##warranty.report_days## jours avant la fin de garantie), afin "
+"que nous puissions faire jouer l'assurance.\n"
+"\n"
+"Cordialement,\n"
+"Le service informatique"
+msgstr ""
+"Bonjour ##user.firstname##,\n"
+"\n"
+"Votre ##item.type## « ##item.name## » (n° de série : ##item.serial##) arrive "
+"en fin de garantie le ##warranty.end##, dans ##warranty.days## jours.\n"
+"\n"
+"Si vous constatez un problème sur ce matériel (panne, dysfonctionnement, "
+"casse), merci de le signaler au service informatique avant le ##warranty."
+"report_by## (##warranty.report_days## jours avant la fin de garantie), afin "
+"que nous puissions faire jouer l'assurance.\n"
+"\n"
+"Cordialement,\n"
+"Le service informatique"
+
+#: src/Config.php:72
 #, php-format
 msgid "Le délai d'alerte doit être compris entre %1$d et %2$d jours."
 msgstr "Le délai d'alerte doit être compris entre %1$d et %2$d jours."
 
-#: src/Config.php:46
+#: src/Config.php:74
 msgid "Expiration proche"
 msgstr "Expiration proche"
 
-#: src/Config.php:48
+#: src/Config.php:76
 #, php-format
 msgid "Couleur invalide : %s"
 msgstr "Couleur invalide : %s"
+
+#: src/Config.php:85
+#, php-format
+msgid "L'objet du mail est limité à %d caractères."
+msgstr "L'objet du mail est limité à %d caractères."
+
+#: src/Config.php:88
+#, php-format
+msgid "Le texte du mail est limité à %d caractères."
+msgstr "Le texte du mail est limité à %d caractères."
+
+#: src/NotificationTargetAlert.php:19
+msgid "Fin de garantie prochaine"
+msgstr "Fin de garantie prochaine"
+
+#: src/NotificationTargetAlert.php:20
+msgid "Rappel de fin de garantie"
+msgstr "Rappel de fin de garantie"
+
+#: src/NotificationTargetAlert.php:26
+msgid "Utilisateur de l'équipement"
+msgstr "Utilisateur de l'équipement"
+
+#: src/NotificationTargetAlert.php:27
+msgid "Entity administrator"
+msgstr "Entity administrator"
+
+#: src/NotificationTargetAlert.php:57
+msgid "Type d'équipement"
+msgstr "Type d'équipement"
+
+#: src/NotificationTargetAlert.php:58
+msgid "Nom de l'équipement"
+msgstr "Nom de l'équipement"
+
+#: src/NotificationTargetAlert.php:59
+msgid "Numéro de série"
+msgstr "Numéro de série"
+
+#: src/NotificationTargetAlert.php:60
+msgid "Nom complet de l'utilisateur"
+msgstr "Nom complet de l'utilisateur"
+
+#: src/NotificationTargetAlert.php:61
+msgid "Prénom de l'utilisateur"
+msgstr "Prénom de l'utilisateur"
+
+#: src/NotificationTargetAlert.php:62
+msgid "Dernier jour de garantie"
+msgstr "Dernier jour de garantie"
+
+#: src/NotificationTargetAlert.php:63
+msgid "Jours restants avant la fin"
+msgstr "Jours restants avant la fin"
+
+#: src/NotificationTargetAlert.php:64
+msgid "Date limite de signalement d'un problème"
+msgstr "Date limite de signalement d'un problème"
+
+#: src/NotificationTargetAlert.php:65
+msgid "Nombre de jours entre cette date limite et la fin"
+msgstr "Nombre de jours entre cette date limite et la fin"
+
+#: src/NotificationTargetAlert.php:66
+msgid "Entité"
+msgstr "Entité"
+
+#: src/Notifications.php:88
+#, php-format
+msgid "Rappel : %s"
+msgstr "Rappel : %s"
 
 #: src/Warranty.php:41
 msgid ""
@@ -91,81 +247,133 @@ msgstr ""
 
 #: src/Warranty.php:50
 msgid ""
+"La copie à l'administrateur de l'entité est activée, mais l'entité racine "
+"n'a pas d'adresse d'administrateur (Administration > Entités > "
+"Notifications) : aucune copie ne partira."
+msgstr ""
+"La copie à l'administrateur de l'entité est activée, mais l'entité racine "
+"n'a pas d'adresse d'administrateur (Administration > Entités > "
+"Notifications) : aucune copie ne partira."
+
+#: src/Warranty.php:57
+msgid ""
 "Certains états exclus n'existent plus dans GLPI : enregistrez la "
 "configuration pour les retirer."
 msgstr ""
 "Certains états exclus n'existent plus dans GLPI : enregistrez la "
 "configuration pour les retirer."
 
-#: src/Warranty.php:98
+#: src/Warranty.php:105
 msgid "Garantie à vie"
 msgstr "Garantie à vie"
 
-#: src/Warranty.php:99
+#: src/Warranty.php:106
 #, php-format
 msgid "Garantie jusqu'au %1$s (dans %2$d j)"
 msgstr "Garantie jusqu'au %1$s (dans %2$d j)"
 
-#: src/Warranty.php:100
+#: src/Warranty.php:107
 #, php-format
 msgid "Garantie bientôt expirée : fin le %1$s (dans %2$d j)"
 msgstr "Garantie bientôt expirée : fin le %1$s (dans %2$d j)"
 
-#: src/Warranty.php:101
+#: src/Warranty.php:108
 #, php-format
 msgid "Garantie expirée le %s"
 msgstr "Garantie expirée le %s"
 
-#: src/Warranty.php:102
+#: src/Warranty.php:109
 msgid "Garantie non renseignée"
 msgstr "Garantie non renseignée"
 
-#: templates/config.html.twig:15
+#: templates/config.html.twig:14 templates/config.html.twig:75
+msgid "Affichage"
+msgstr "Affichage"
+
+#: templates/config.html.twig:14
+msgid "Mails automatiques"
+msgstr "Mails automatiques"
+
+#: templates/config.html.twig:19
 msgid "Warranty Color — configuration"
 msgstr "Warranty Color — configuration"
 
-#: templates/config.html.twig:28
+#: templates/config.html.twig:33
+msgid "(modifié)"
+msgstr "(modifié)"
+
+#: templates/config.html.twig:42
 msgid "Valeurs par défaut rétablies : pensez à enregistrer."
 msgstr "Valeurs par défaut rétablies : pensez à enregistrer."
 
-#: templates/config.html.twig:33
+#: templates/config.html.twig:44
+msgid "Texte par défaut rétabli : pensez à enregistrer."
+msgstr "Texte par défaut rétabli : pensez à enregistrer."
+
+#: templates/config.html.twig:45
+msgid ""
+"Marquer les équipements concernés comme déjà notifiés ? Ils ne recevront pas "
+"de mail pour cette période de garantie. Les modifications non enregistrées "
+"du formulaire seront perdues."
+msgstr ""
+"Marquer les équipements concernés comme déjà notifiés ? Ils ne recevront pas "
+"de mail pour cette période de garantie. Les modifications non enregistrées "
+"du formulaire seront perdues."
+
+#: templates/config.html.twig:46 templates/config.html.twig:115
+msgid "ENVOI RÉEL"
+msgstr "ENVOI RÉEL"
+
+#: templates/config.html.twig:46 templates/config.html.twig:115
+msgid "SIMULATION"
+msgstr "SIMULATION"
+
+#: templates/config.html.twig:55
 msgid "Seuil d'alerte"
 msgstr "Seuil d'alerte"
 
-#: templates/config.html.twig:34
+#: templates/config.html.twig:56
 msgid "Alerte avant expiration (jours)"
 msgstr "Alerte avant expiration (jours)"
 
-#: templates/config.html.twig:39
+#: templates/config.html.twig:61
+msgid "Ce délai sert aussi aux mails automatiques."
+msgstr "Ce délai sert aussi aux mails automatiques."
+
+#: templates/config.html.twig:61
 msgid "Une garantie qui expire dans ce délai est signalée en orange."
 msgstr "Une garantie qui expire dans ce délai est signalée en orange."
 
-#: templates/config.html.twig:39
+#: templates/config.html.twig:61
 #, php-format
 msgid "Valeurs possibles : %1$d à %2$d jours."
 msgstr "Valeurs possibles : %1$d à %2$d jours."
 
-#: templates/config.html.twig:42
+#: templates/config.html.twig:64
 msgid "Couleurs"
 msgstr "Couleurs"
 
-#: templates/config.html.twig:43
+#: templates/config.html.twig:65
 msgid "Couleur « garantie valide »"
 msgstr "Couleur « garantie valide »"
 
-#: templates/config.html.twig:44
+#: templates/config.html.twig:66
 msgid "Couleur « expiration proche »"
 msgstr "Couleur « expiration proche »"
 
-#: templates/config.html.twig:46
+#: templates/config.html.twig:68
 msgid "Exclusions"
 msgstr "Exclusions"
 
-#: templates/config.html.twig:47
+#: templates/config.html.twig:69
 msgid "États à ne pas signaler"
 msgstr "États à ne pas signaler"
 
-#: templates/config.html.twig:50
+#: templates/config.html.twig:72
+msgid "Ils ne reçoivent pas non plus de mail automatique."
+msgstr "Ils ne reçoivent pas non plus de mail automatique."
+
+#: templates/config.html.twig:72
 msgid ""
 "Les équipements dans ces états (ex. retiré, perdu) n'ont ni pastille ni "
 "teinte, et sont absents des listes de la légende."
@@ -173,18 +381,186 @@ msgstr ""
 "Les équipements dans ces états (ex. retiré, perdu) n'ont ni pastille ni "
 "teinte, et sont absents des listes de la légende."
 
-#: templates/config.html.twig:53
-msgid "Affichage"
-msgstr "Affichage"
-
-#: templates/config.html.twig:54
+#: templates/config.html.twig:76
 msgid "Teinter toute la ligne (sinon : pastille et repère latéral seulement)"
 msgstr "Teinter toute la ligne (sinon : pastille et repère latéral seulement)"
 
-#: templates/config.html.twig:56 templates/config.html.twig:58
+#: templates/config.html.twig:78 templates/config.html.twig:80
 msgid "Aperçu"
 msgstr "Aperçu"
 
-#: templates/config.html.twig:72
+#: templates/config.html.twig:90
 msgid "Valeurs par défaut"
 msgstr "Valeurs par défaut"
+
+#: templates/config.html.twig:99
+msgid ""
+"Les notifications par e-mail de GLPI sont désactivées : aucun mail ne "
+"partira tant qu'elles ne sont pas activées."
+msgstr ""
+"Les notifications par e-mail de GLPI sont désactivées : aucun mail ne "
+"partira tant qu'elles ne sont pas activées."
+
+#: templates/config.html.twig:100
+msgid "Configuration > Notifications"
+msgstr "Configuration > Notifications"
+
+#: templates/config.html.twig:105
+msgid "Activation"
+msgstr "Activation"
+
+#: templates/config.html.twig:106
+msgid "Activer les mails automatiques"
+msgstr "Activer les mails automatiques"
+
+#: templates/config.html.twig:108
+msgid ""
+"Chaque jour, l'utilisateur affecté à un équipement dont la garantie arrive à "
+"échéance reçoit un mail (une fois par période de garantie)."
+msgstr ""
+"Chaque jour, l'utilisateur affecté à un équipement dont la garantie arrive à "
+"échéance reçoit un mail (une fois par période de garantie)."
+
+#: templates/config.html.twig:110
+msgid "Mode simulation (rien n'est envoyé)"
+msgstr "Mode simulation (rien n'est envoyé)"
+
+#: templates/config.html.twig:112
+msgid ""
+"Tant que ce mode est actif, l'action automatique ne fait que calculer ce qui "
+"serait envoyé (voir plus bas). Décochez-le pour envoyer réellement."
+msgstr ""
+"Tant que ce mode est actif, l'action automatique ne fait que calculer ce qui "
+"serait envoyé (voir plus bas). Décochez-le pour envoyer réellement."
+
+#: templates/config.html.twig:118
+msgid "Destinataires"
+msgstr "Destinataires"
+
+#: templates/config.html.twig:119
+msgid "Envoyer une copie à l'administrateur de l'entité (service informatique)"
+msgstr ""
+"Envoyer une copie à l'administrateur de l'entité (service informatique)"
+
+#: templates/config.html.twig:121
+msgid ""
+"L'adresse est celle de l'administrateur définie dans l'entité "
+"(Administration > Entités > Notifications)."
+msgstr ""
+"L'adresse est celle de l'administrateur définie dans l'entité "
+"(Administration > Entités > Notifications)."
+
+#: templates/config.html.twig:123
+msgid "Envoyer aussi un rappel à la moitié du délai"
+msgstr "Envoyer aussi un rappel à la moitié du délai"
+
+#: templates/config.html.twig:125
+#, php-format
+msgid ""
+"Un second mail part quand il reste %d jours avant la fin de garantie (la "
+"moitié du délai d'alerte) ; c'est aussi la date limite de signalement "
+"indiquée dans le mail."
+msgstr ""
+"Un second mail part quand il reste %d jours avant la fin de garantie (la "
+"moitié du délai d'alerte) ; c'est aussi la date limite de signalement "
+"indiquée dans le mail."
+
+#: templates/config.html.twig:128
+msgid "Message"
+msgstr "Message"
+
+#: templates/config.html.twig:129
+msgid "Objet"
+msgstr "Objet"
+
+#: templates/config.html.twig:130
+msgid "Texte"
+msgstr "Texte"
+
+#: templates/config.html.twig:132
+msgid "Balises disponibles (remplacées dans chaque mail) :"
+msgstr "Balises disponibles (remplacées dans chaque mail) :"
+
+#: templates/config.html.twig:135
+msgid "Rétablir le texte par défaut"
+msgstr "Rétablir le texte par défaut"
+
+#: templates/config.html.twig:138
+msgid "Simulation et dernier passage"
+msgstr "Simulation et dernier passage"
+
+#: templates/config.html.twig:140
+#, php-format
+msgid ""
+"Si l'action automatique tournait maintenant : %1$d mail(s) partiraient, %2$d "
+"équipement(s) seraient ignorés."
+msgstr ""
+"Si l'action automatique tournait maintenant : %1$d mail(s) partiraient, %2$d "
+"équipement(s) seraient ignorés."
+
+#: templates/config.html.twig:144
+msgid "Mails qui partiraient"
+msgstr "Mails qui partiraient"
+
+#: templates/config.html.twig:147
+msgid "Équipement"
+msgstr "Équipement"
+
+#: templates/config.html.twig:148
+msgid "Utilisateur"
+msgstr "Utilisateur"
+
+#: templates/config.html.twig:149
+msgid "Fin de garantie"
+msgstr "Fin de garantie"
+
+#: templates/config.html.twig:150
+msgid "Envoi"
+msgstr "Envoi"
+
+#: templates/config.html.twig:159
+msgid "Mail initial"
+msgstr "Mail initial"
+
+#: templates/config.html.twig:159
+msgid "Rappel"
+msgstr "Rappel"
+
+#: templates/config.html.twig:167
+msgid "Ignoré"
+msgstr "Ignoré"
+
+#: templates/config.html.twig:174
+msgid "Les 20 premières lignes de chaque liste sont affichées."
+msgstr "Les 20 premières lignes de chaque liste sont affichées."
+
+#: templates/config.html.twig:179
+msgid "Ces mails partiront au prochain passage de l'action automatique."
+msgstr "Ces mails partiront au prochain passage de l'action automatique."
+
+#: templates/config.html.twig:184
+msgid "Marquer les équipements concernés comme déjà notifiés"
+msgstr "Marquer les équipements concernés comme déjà notifiés"
+
+#: templates/config.html.twig:186
+msgid "À faire avant la première activation pour éviter un envoi massif."
+msgstr "À faire avant la première activation pour éviter un envoi massif."
+
+#: templates/config.html.twig:191
+#, php-format
+msgid "Dernier passage de l'action automatique : %s."
+msgstr "Dernier passage de l'action automatique : %s."
+
+#: templates/config.html.twig:191
+msgid "jamais"
+msgstr "jamais"
+
+#: templates/config.html.twig:193
+msgid "Voir l'action automatique"
+msgstr "Voir l'action automatique"
+
+#: templates/config.html.twig:195
+msgid ""
+"L'action automatique n'est pas encore enregistrée (réinstallez le plugin)."
+msgstr ""
+"L'action automatique n'est pas encore enregistrée (réinstallez le plugin)."

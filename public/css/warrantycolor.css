@@ -110,6 +110,9 @@ tr[data-warranty="warning"] > td:first-child {
 .wc-card { max-width: 48rem; }
 /* Message de retour (« Valeurs par défaut rétablies ») : couleur du texte du thème, lisible en clair comme en sombre. */
 .wc-help { font-size: .85em; color: var(--tblr-body-color); opacity: .8; }
+.wc-help code { color: var(--tblr-body-color); background: transparent; padding: 0 .25rem; border: 1px solid rgb(128 128 128 / .35); border-radius: .25rem; }
+/* Table de simulation des mails : pas plus haute que 20 lignes visibles. */
+.wc-sim { max-height: 18rem; overflow-y: auto; }
 .wc-preview td { padding: .5rem .75rem; }
 
 @media (forced-colors: active) {
