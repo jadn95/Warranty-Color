@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root>
+    <name>Warranty Color</name>
+    <key>warrantycolor</key>
+    <state>stable</state>
+    <logo>https://raw.githubusercontent.com/jadn95/Warranty-Color/main/logo-40.png</logo>
+    <description>
+        <short>
+            <en>Shows the warranty status of assets in lists and forms: green, orange (expires soon) and grey (expired).</en>
+            <fr>Affiche l'état de la garantie des équipements dans les listes et les fiches : vert, orange (expire bientôt) et gris (expirée).</fr>
+        </short>
+        <long>
+            <en>Warranty Color adds a badge (icon and tooltip, never colour alone), an optional row tint and a clickable legend to asset lists. A click on a state opens a native GLPI search listing every asset in that state, sorted by warranty end date. The asset form shows a status banner, and assets linked to tickets, problems and changes get the same badge. Alert delay, colours and the asset states to ignore (retired, lost…) are configurable. Rights follow GLPI's financial information rights.</en>
+            <fr>Warranty Color ajoute aux listes d'équipements une pastille (icône et info-bulle, jamais la couleur seule), une teinte de ligne optionnelle et une légende cliquable. Un clic sur un état ouvre une recherche GLPI native listant tous les équipements dans cet état, triés par date de fin de garantie. La fiche affiche un bandeau d'état, et les équipements liés aux tickets, problèmes et changements reçoivent la même pastille. Le délai d'alerte, les couleurs et les états à ignorer (retiré, perdu…) se règlent dans la configuration. Les droits suivent ceux des informations financières de GLPI.</fr>
+        </long>
+    </description>
+    <homepage>https://github.com/jadn95/Warranty-Color</homepage>
+    <download>https://github.com/jadn95/Warranty-Color/releases</download>
+    <issues>https://github.com/jadn95/Warranty-Color/issues</issues>
+    <readme>https://raw.githubusercontent.com/jadn95/Warranty-Color/main/README.md</readme>
+    <authors>
+        <author>Andy Tkaczyk</author>
+    </authors>
+    <versions>
+        <version>
+            <num>2.2.2</num>
+            <compatibility>~12.0.0</compatibility>
+            <download_url>https://github.com/jadn95/Warranty-Color/releases/download/2.2.2/warrantycolor-2.2.2.tar.bz2</download_url>
+        </version>
+    </versions>
+    <langs>
+        <lang>fr_FR</lang>
+    </langs>
+    <license>GPL v3+</license>
+    <tags>
+        <fr>
+            <tag>garantie</tag>
+            <tag>inventaire</tag>
+            <tag>couleur</tag>
+        </fr>
+        <en>
+            <tag>warranty</tag>
+            <tag>inventory</tag>
+            <tag>color</tag>
+        </en>
+    </tags>
+</root>

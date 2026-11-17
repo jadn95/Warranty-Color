@@ -1,0 +1,216 @@
+{# Page de configuration de Warranty Color, construite avec les macros de formulaire de GLPI : deux onglets (Affichage, Mails
+   automatiques) dans un seul formulaire et un seul bouton Sauvegarder.
+   Variables : action, conf, defaults, days_min, days_max, states_map (id => nom), warnings, needs_csrf,
+   active_tab, notify_ready, report_days, sim (due, ignored, sent...), tags, last_run, notifications_url, crontask_url,
+   default_subject, default_body. #}
+{% import 'components/form/fields_macros.html.twig' as fields %}
+
+{% set field_options = {field_class: 'col-12', label_class: 'col-xxl-5', input_class: 'col-xxl-7'} %}
+{% set preview = [
+    {state: 'valid', icon: 'ti-shield-check', text: __('Garantie valide', 'warrantycolor')},
+    {state: 'warning', icon: 'ti-alert-triangle', text: __('Expire dans %d jours ou moins', 'warrantycolor')|format(conf.days_before_expiration)},
+    {state: 'expired', icon: 'ti-shield-off', text: __('Expirée', 'warrantycolor')},
+] %}
+{% set tabs = {display: __('Affichage', 'warrantycolor'), mails: __('Mails automatiques', 'warrantycolor')} %}
+
+<div class="container-fluid">
+    <div class="card wc-card">
+        <div class="card-header">
+            <h3 class="card-title"><i class="ti ti-shield-check me-2" aria-hidden="true"></i>{{ __('Configuration de Warranty Color', 'warrantycolor') }}</h3>
+        </div>
+        <div class="card-body">
+            {% for warning in warnings %}
+                <div class="alert alert-{{ warning.level }}" role="alert">
+                    <i class="ti {{ warning.level == 'danger' ? 'ti-alert-circle' : 'ti-alert-triangle' }} me-2" aria-hidden="true"></i>{{ warning.text }}
+                </div>
+            {% endfor %}
+
+            <ul class="nav nav-tabs mb-3" role="tablist">
+                {% for key, label in tabs %}
+                    <li class="nav-item" role="presentation">
+                        <button type="button" class="nav-link{{ key == active_tab ? ' active' : '' }}" id="wc-tab-{{ key }}" data-wc-tab="{{ key }}"
+                                data-bs-toggle="tab" data-bs-target="#wc-pane-{{ key }}" role="tab" aria-controls="wc-pane-{{ key }}"
+                                aria-selected="{{ key == active_tab ? 'true' : 'false' }}">{{ label }}<i class="ti ti-circle-filled ms-1 wc-dirty d-none" aria-hidden="true"></i><span class="visually-hidden wc-dirty-label d-none">{{ __('(modifié)', 'warrantycolor') }}</span></button>
+                    </li>
+                {% endfor %}
+            </ul>
+
+            <form method="post" action="{{ action }}" id="wc-config-form" data-track-changes="true"
+                  data-default-days="{{ defaults.days_before_expiration }}" data-default-valid="{{ defaults.color_valid }}"
+                  data-default-warning="{{ defaults.color_warning }}" data-default-full-row="{{ defaults.full_row }}"
+                  data-warning-label="{{ __('Expire dans %d jours ou moins', 'warrantycolor') }}"
+                  data-reset-message="{{ __('Valeurs par défaut rétablies : pensez à enregistrer.', 'warrantycolor') }}"
+                  data-default-subject="{{ default_subject }}" data-default-body="{{ default_body }}"
+                  data-text-reset-message="{{ __('Texte par défaut rétabli : pensez à enregistrer.', 'warrantycolor') }}"
+                  data-baseline-confirm="{{ __('Marquer les équipements concernés comme déjà notifiés ? Ils ne recevront pas de mail pour cette période de garantie. Les modifications non enregistrées du formulaire seront perdues.', 'warrantycolor') }}"
+                  data-mode-simulation="{{ __('SIMULATION', 'warrantycolor') }}" data-mode-real="{{ __('ENVOI RÉEL', 'warrantycolor') }}">
+                {# GLPI 12 gère le jeton CSRF automatiquement ; seule la 11 attend encore le champ. #}
+                {% if needs_csrf %}{{ fields.csrfField() }}{% endif %}
+                <input type="hidden" name="_tab" id="wc-tab-input" value="{{ active_tab }}">
+
+                <div class="tab-content">
+                    {# ------------------------------------------------------------------ Onglet Affichage #}
+                    <div class="tab-pane fade{{ active_tab == 'display' ? ' show active' : '' }}" id="wc-pane-display" role="tabpanel" aria-labelledby="wc-tab-display" tabindex="0">
+                        <div class="row">
+                            {{ fields.largeTitle(__('Seuil d\'alerte', 'warrantycolor'), 'ti ti-hourglass-high', true) }}
+                            {{ fields.numberField('days_before_expiration', conf.days_before_expiration, __('Alerte avant expiration (jours)', 'warrantycolor'), field_options|merge({
+                                id: 'wc-days',
+                                min: days_min,
+                                max: days_max,
+                                required: true,
+                                helper: __('Une garantie qui expire dans ce délai est signalée en orange.', 'warrantycolor') ~ ' ' ~ __('Valeurs possibles : %1$d à %2$d jours.', 'warrantycolor')|format(days_min, days_max) ~ ' ' ~ __('Ce délai sert aussi aux mails automatiques.', 'warrantycolor'),
+                            })) }}
+
+                            {{ fields.largeTitle(__('Couleurs', 'warrantycolor'), 'ti ti-palette') }}
+                            {{ fields.colorField('color_valid', conf.color_valid, __('Couleur « garantie valide »', 'warrantycolor'), field_options|merge({id: 'wc-valid'})) }}
+                            {{ fields.colorField('color_warning', conf.color_warning, __('Couleur « expiration proche »', 'warrantycolor'), field_options|merge({id: 'wc-warning'})) }}
+
+                            {{ fields.largeTitle(__('Exclusions', 'warrantycolor'), 'ti ti-filter-off') }}
+                            {{ fields.dropdownArrayField('excluded_states', '', states_map, __('États à ne pas signaler', 'warrantycolor'), field_options|merge({
+                                multiple: true,
+                                values: conf.excluded_states,
+                                helper: __("Les équipements dans ces états (ex. retiré, perdu) n'ont ni pastille ni teinte, et sont absents des listes de la légende.", 'warrantycolor') ~ ' ' ~ __('Ils ne reçoivent pas non plus de mail automatique.', 'warrantycolor'),
+                            })) }}
+
+                            {{ fields.largeTitle(__('Affichage', 'warrantycolor'), 'ti ti-layout-list') }}
+                            {{ fields.checkboxField('full_row', conf.full_row, __('Teinter toute la ligne (sinon : pastille et repère latéral seulement)', 'warrantycolor'), field_options|merge({id: 'wc-full-row'})) }}
+
+                            {{ fields.largeTitle(__('Aperçu', 'warrantycolor'), 'ti ti-eye') }}
+                            <div class="col-12 mb-3">
+                                <table class="table table-sm table-striped wc-preview" id="wc-preview" aria-label="{{ __('Aperçu', 'warrantycolor') }}">
+                                    <tbody>
+                                        {% for item in preview %}
+                                            <tr{% if item.state != 'expired' %} data-warranty="{{ item.state }}"{% endif %}>
+                                                <td>PC-{{ item.state|upper }}<span class="warranty-badge" data-state="{{ item.state }}" role="img" aria-label="{{ item.text }}" data-tip="{{ item.text }}"><i class="ti {{ item.icon }}" aria-hidden="true"></i></span></td>
+                                                <td>{{ item.text }}</td>
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                                <button type="button" id="wc-reset" class="btn btn-outline-secondary"><i class="ti ti-restore" aria-hidden="true"></i> <span>{{ __('Valeurs par défaut', 'warrantycolor') }}</span></button>
+                            </div>
+                        </div>
+                    </div>
+
+                    {# ------------------------------------------------------------------ Onglet Mails automatiques #}
+                    <div class="tab-pane fade{{ active_tab == 'mails' ? ' show active' : '' }}" id="wc-pane-mails" role="tabpanel" aria-labelledby="wc-tab-mails" tabindex="0">
+                        {% if not notify_ready %}
+                            <div class="alert alert-warning" role="alert">
+                                <i class="ti ti-alert-triangle me-2" aria-hidden="true"></i>{{ __('Les notifications par e-mail de GLPI sont désactivées : aucun mail ne partira tant qu\'elles ne sont pas activées.', 'warrantycolor') }}
+                                <a href="{{ notifications_url }}" class="alert-link">{{ __('Configuration > Notifications', 'warrantycolor') }}</a>
+                            </div>
+                        {% endif %}
+
+                        <div class="row">
+                            {{ fields.largeTitle(__('Activation', 'warrantycolor'), 'ti ti-power', true) }}
+                            {{ fields.checkboxField('notify_enabled', conf.notify_enabled, __('Activer les mails automatiques', 'warrantycolor'), field_options|merge({
+                                id: 'wc-notify-enabled',
+                                helper: __('Chaque jour, l\'utilisateur affecté à un équipement dont la garantie arrive à échéance reçoit un mail (une fois par période de garantie).', 'warrantycolor'),
+                            })) }}
+                            {{ fields.checkboxField('notify_simulation', conf.notify_simulation, __('Mode simulation (rien n\'est envoyé)', 'warrantycolor'), field_options|merge({
+                                id: 'wc-notify-simulation',
+                                helper: __('Tant que ce mode est actif, l\'action automatique ne fait que calculer ce qui serait envoyé (voir plus bas). Décochez-le pour envoyer réellement.', 'warrantycolor'),
+                            })) }}
+                            <div class="col-12 mb-2">
+                                <span class="badge text-white {{ conf.notify_simulation ? 'bg-blue' : 'bg-red' }}" id="wc-mode-badge" role="status">{{ conf.notify_simulation ? __('SIMULATION', 'warrantycolor') : __('ENVOI RÉEL', 'warrantycolor') }}</span>
+                            </div>
+
+                            {{ fields.largeTitle(__('Destinataires', 'warrantycolor'), 'ti ti-users') }}
+                            {{ fields.checkboxField('notify_copy_admin', conf.notify_copy_admin, __('Envoyer une copie à l\'administrateur de l\'entité (service informatique)', 'warrantycolor'), field_options|merge({
+                                id: 'wc-notify-copy',
+                                helper: __('L\'adresse est celle de l\'administrateur définie dans l\'entité (Administration > Entités > Notifications).', 'warrantycolor'),
+                            })) }}
+                            {{ fields.textField('notify_cc', conf.notify_cc, __('Autres adresses en copie', 'warrantycolor'), field_options|merge({
+                                id: 'wc-notify-cc',
+                                maxlength: 3000,
+                                placeholder: 'gestion@exemple.fr, dsi@exemple.fr',
+                                helper: __('Facultatif : adresses séparées par des virgules (10 au plus), qui reçoivent chaque mail en plus de l\'utilisateur.', 'warrantycolor'),
+                            })) }}
+                            {{ fields.checkboxField('notify_reminder', conf.notify_reminder, __('Envoyer aussi un rappel à la moitié du délai', 'warrantycolor'), field_options|merge({
+                                id: 'wc-notify-reminder',
+                                helper: __('Un second mail part quand il reste %d jours avant la fin de garantie (la moitié du délai d\'alerte) ; c\'est aussi la date limite de signalement indiquée dans le mail.', 'warrantycolor')|format(report_days),
+                            })) }}
+
+                            {{ fields.largeTitle(__('Message', 'warrantycolor'), 'ti ti-mail') }}
+                            {{ fields.textField('notify_subject', conf.notify_subject, __('Objet', 'warrantycolor'), field_options|merge({id: 'wc-notify-subject', maxlength: 200, required: true})) }}
+                            {{ fields.textareaField('notify_body', conf.notify_body, __('Texte', 'warrantycolor'), field_options|merge({id: 'wc-notify-body', rows: 10, field_class: 'col-12', label_class: 'col-xxl-2', input_class: 'col-xxl-10'})) }}
+                            <div class="col-12 mb-3">
+                                <div class="wc-help mb-2">{{ __('Balises disponibles (remplacées dans chaque mail) :', 'warrantycolor') }}
+                                    {% for tag, label in tags %}<code class="me-2" title="{{ label }}">##{{ tag }}##</code>{% endfor %}
+                                </div>
+                                <button type="button" id="wc-text-reset" class="btn btn-outline-secondary btn-sm"><i class="ti ti-restore" aria-hidden="true"></i> <span>{{ __('Rétablir le texte par défaut', 'warrantycolor') }}</span></button>
+                            </div>
+
+                            {{ fields.largeTitle(__('Simulation et dernier passage', 'warrantycolor'), 'ti ti-list-check') }}
+                            <div class="col-12 mb-3">
+                                <p class="mb-2">{{ __('Si l\'action automatique tournait maintenant : %1$d mail(s) partiraient, %2$d équipement(s) seraient ignorés.', 'warrantycolor')|format(sim.due|length, sim.ignored|length) }}</p>
+                                {% if sim.due or sim.ignored %}
+                                    <div class="table-responsive wc-sim">
+                                        <table class="table table-sm table-striped">
+                                            <caption class="visually-hidden">{{ __('Mails qui partiraient', 'warrantycolor') }}</caption>
+                                            <thead>
+                                                <tr>
+                                                    <th scope="col">{{ __('Équipement', 'warrantycolor') }}</th>
+                                                    <th scope="col">{{ __('Utilisateur', 'warrantycolor') }}</th>
+                                                    <th scope="col">{{ __('Fin de garantie', 'warrantycolor') }}</th>
+                                                    <th scope="col">{{ __('Envoi', 'warrantycolor') }}</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {% for row in sim.due|slice(0, 20) %}
+                                                    <tr>
+                                                        <td>{{ row.tags.type }} {{ row.name }}</td>
+                                                        <td>{{ row.user }}</td>
+                                                        <td>{{ row.tags.end }} ({{ row.days }} j)</td>
+                                                        <td>{{ row.stage == 'first' ? __('Mail initial', 'warrantycolor') : __('Rappel', 'warrantycolor') }}</td>
+                                                    </tr>
+                                                {% endfor %}
+                                                {% for row in sim.ignored|slice(0, 20) %}
+                                                    <tr class="text-muted">
+                                                        <td>{{ row.tags.type }} {{ row.name }}</td>
+                                                        <td>{{ row.user ?: '—' }}</td>
+                                                        <td>{{ row.tags.end }} ({{ row.days }} j)</td>
+                                                        <td>{{ __('Ignoré', 'warrantycolor') }} : {{ row.reason }}</td>
+                                                    </tr>
+                                                {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    {% if sim.due|length > 20 or sim.ignored|length > 20 %}
+                                        <div class="wc-help">{{ __('Les 20 premières lignes de chaque liste sont affichées.', 'warrantycolor') }}</div>
+                                    {% endif %}
+                                {% endif %}
+
+                                {% if sim.due and conf.notify_enabled and not conf.notify_simulation %}
+                                    <div class="alert alert-info mt-2" role="status">{{ __('Ces mails partiront au prochain passage de l\'action automatique.', 'warrantycolor') }}</div>
+                                {% endif %}
+
+                                <div class="mt-3 d-flex flex-wrap align-items-center gap-2">
+                                    <button type="submit" name="wc_baseline" value="1" formnovalidate id="wc-baseline" class="btn btn-outline-secondary"{{ sim.due ? '' : ' disabled' }}>
+                                        <i class="ti ti-checks" aria-hidden="true"></i> <span>{{ __('Marquer les équipements concernés comme déjà notifiés', 'warrantycolor') }}</span>
+                                    </button>
+                                    <span class="wc-help">{{ __('À faire avant la première activation pour éviter un envoi massif.', 'warrantycolor') }}</span>
+                                </div>
+
+                                <div class="mt-3 wc-help">
+                                    {% if last_run %}
+                                        {{ __('Dernier passage de l\'action automatique : %s.', 'warrantycolor')|format(last_run.lastrun ?: __('jamais', 'warrantycolor')) }}
+                                        {% for message in last_run.messages %}<div>{{ message.date }} — {{ message.content }}</div>{% endfor %}
+                                        <a href="{{ crontask_url }}">{{ __('Voir l\'action automatique', 'warrantycolor') }}</a>
+                                    {% else %}
+                                        {{ __('L\'action automatique n\'est pas encore enregistrée (réinstallez le plugin).', 'warrantycolor') }}
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-footer mx-n2 d-flex align-items-center flex-wrap gap-2">
+                    <span class="wc-help" id="wc-live" role="status" aria-live="polite"></span>
+                    <button type="submit" name="update" value="1" class="ms-auto btn btn-primary"><i class="ti ti-device-floppy" aria-hidden="true"></i> <span>{{ _x('button', 'Save') }}</span></button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
